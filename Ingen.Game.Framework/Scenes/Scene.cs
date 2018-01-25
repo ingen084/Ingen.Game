@@ -1,4 +1,5 @@
 ﻿using Ingen.Game.Framework.Resources;
+using SharpDX.Direct2D1;
 using System;
 
 namespace Ingen.Game.Framework.Scenes
@@ -11,7 +12,7 @@ namespace Ingen.Game.Framework.Scenes
 			Resource = new ResourceLoader();
 		}
 
-		public abstract void Render();
+		public abstract void Render(RenderTarget target);
 		public abstract void Logic();
 
 		public virtual void Dispose()
