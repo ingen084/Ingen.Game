@@ -33,6 +33,15 @@
     <Reference Include="CommonServiceLocator, Version=2.0.2.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
       <HintPath>..\packages\Unity.5.5.6\lib\net47\CommonServiceLocator.dll</HintPath>
     </Reference>
+    <Reference Include="SharpDX, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpDX.4.0.1\lib\net45\SharpDX.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Direct2D1, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpDX.Direct2D1.4.0.1\lib\net45\SharpDX.Direct2D1.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.DXGI, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpDX.DXGI.4.0.1\lib\net45\SharpDX.DXGI.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -64,11 +73,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Resources\Brushes\BrushResource.cs" />
+    <Compile Include="Resources\Brushes\SolidColorBrushResource.cs" />
+    <Compile Include="Resources\Images\ImageResource.cs" />
+    <Compile Include="Resources\Images\PngImageResource.cs" />
+    <Compile Include="Resources\ResourceLoader.cs" />
+    <Compile Include="Resources\IResource.cs" />
     <Compile Include="Scene.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Navigator\SceneNavigator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
