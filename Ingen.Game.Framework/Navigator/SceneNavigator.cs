@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Ingen.Game.Framework.Scenes;
+using System;
 using Unity;
 
 namespace Ingen.Game.Framework.Navigator

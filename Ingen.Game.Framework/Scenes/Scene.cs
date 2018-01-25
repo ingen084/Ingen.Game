@@ -1,7 +1,7 @@
 ﻿using Ingen.Game.Framework.Resources;
 using System;
 
-namespace Ingen.Game.Framework
+namespace Ingen.Game.Framework.Scenes
 {
 	public abstract class Scene : IDisposable
 	{
