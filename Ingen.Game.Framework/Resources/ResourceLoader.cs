@@ -1,43 +1,61 @@
 ﻿using SharpDX.Direct2D1;
 using System;
 using System.Collections;
+using System.Threading;
 
 namespace Ingen.Game.Framework.Resources
 {
 	public class ResourceLoader : IDisposable
 	{
-		Hashtable _hashtable;
+		ReaderWriterLockSlim HashtableLock { get; }
+		Hashtable Hashtable { get; }
 
 		public ResourceLoader()
 		{
-			_hashtable = new Hashtable();
+			HashtableLock = new ReaderWriterLockSlim();
+			Hashtable = new Hashtable();
 		}
 
-		public void AddResource(object key, IResource resource)
+		public void AddResource(string key, IResource resource)
 		{
-			//memo インスタンス生成(主に時間がかかる読み込み)は外部でやらせてるので影響は少ない
-			lock (_hashtable)
-				_hashtable.Add(key, resource);
+			HashtableLock.EnterWriteLock();
+			try
+			{
+				Hashtable.Add(key, resource);
+			}
+			finally
+			{
+				HashtableLock.ExitWriteLock();
+			}
 		}
 
 		public IResource this[object key]
 		{
-			get => _hashtable[key] as IResource;
+			get => Hashtable[key] as IResource;
 		}
+		public TResource Get<TResource>(object key) where TResource : class, IResource
+			=> Hashtable[key] as TResource;
 
 		public void UpdateRenderTarget(RenderTarget target)
 		{
-			lock (_hashtable)
-				foreach (var resource in _hashtable)
-					(resource as IResource)?.Update(target);
+			HashtableLock.EnterWriteLock();
+			try
+			{
+				foreach (var resource in Hashtable.Values)
+					(resource as IResource)?.UpdateRenderTarget(target);
+			}
+			finally
+			{
+				HashtableLock.ExitWriteLock();
+			}
 		}
 
 		public void Dispose()
 		{
-			foreach (var resource in _hashtable)
+			foreach (var resource in Hashtable)
 				(resource as IDisposable)?.Dispose();
-			lock (_hashtable)
-				_hashtable.Clear();
+			lock (Hashtable)
+				Hashtable.Clear();
 		}
 	}
 }

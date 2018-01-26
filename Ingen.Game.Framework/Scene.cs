@@ -2,7 +2,7 @@
 using SharpDX.Direct2D1;
 using System;
 
-namespace Ingen.Game.Framework.Scenes
+namespace Ingen.Game.Framework
 {
 	public abstract class Scene : IDisposable
 	{
@@ -12,8 +12,16 @@ namespace Ingen.Game.Framework.Scenes
 			Resource = new ResourceLoader();
 		}
 
-		public abstract void Render(RenderTarget target);
-		public abstract void Logic();
+		protected RenderTarget RenderTarget { get; private set; }
+
+		public virtual void UpdateRenderTarget(RenderTarget target)
+		{
+			RenderTarget = target;
+			Resource.UpdateRenderTarget(target);
+		}
+
+		public abstract void Render();
+		public abstract void Update();
 
 		public virtual void Dispose()
 		{

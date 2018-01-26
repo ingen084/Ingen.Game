@@ -16,8 +16,6 @@ namespace Ingen.Game.Framework
 {
 	public class GameForm : Form
 	{
-		private CancellationTokenSource RenderTaskCancellationTokenSource;
-
 		#region Direct3D Fields
 		D3D11.Device _d3d11device;
 		public ref D3D11.Device D3D11Device => ref _d3d11device;
@@ -45,14 +43,12 @@ namespace Ingen.Game.Framework
 			IsEnableVSync = isEnableVSync;
 		}
 
-		protected override void OnLoad(EventArgs e)
+		public void Initalize()
 		{
 			ClientSize = new System.Drawing.Size(1280, 720);
 			StartPosition = FormStartPosition.CenterScreen;
 			MaximizeBox = false;
 			FormBorderStyle = FormBorderStyle.FixedSingle;
-
-			base.OnLoad(e);
 
 			#region Direct3D Initalize
 			// SwapChain description
@@ -94,20 +90,11 @@ namespace Ingen.Game.Framework
 			//using (var d2d1Device = new D2D1.Device(dxgiDevice))
 			//	D2D1DeviceContext = new D2D1.DeviceContext(d2d1Device, D2D1.DeviceContextOptions.EnableMultithreadedOptimizations);
 			#endregion
-
-			RenderTaskCancellationTokenSource = new CancellationTokenSource();
-		}
-
-		protected override void OnClosed(EventArgs e)
-		{
-			base.OnClosed(e);
-
-			RenderTaskCancellationTokenSource.Cancel();
 		}
 
 		public void BeginDraw()
 		{
-			D3D11Device.ImmediateContext.Rasterizer.SetViewport(0, 0, Width, Height);
+			D3D11Device.ImmediateContext.Rasterizer.SetViewport(0, 0, ClientSize.Width, ClientSize.Height);
 			D3D11Device.ImmediateContext.OutputMerger.SetTargets(_backBufferView);
 
 			RenderTarget.BeginDraw();

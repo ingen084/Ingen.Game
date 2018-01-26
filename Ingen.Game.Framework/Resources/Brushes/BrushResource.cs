@@ -9,8 +9,9 @@ namespace Ingen.Game.Framework.Resources.Brushes
 		public Brush Brush => _brush;
 
 		protected abstract void CreateBrush(RenderTarget target);
-		public void Update(RenderTarget target)
+		public void UpdateRenderTarget(RenderTarget target)
 		{
+			System.Diagnostics.Debug.WriteLine("Brush Updated");
 			_brush?.Dispose();
 			CreateBrush(target);
 		}

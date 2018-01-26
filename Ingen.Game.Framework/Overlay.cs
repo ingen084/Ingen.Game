@@ -2,9 +2,7 @@
 
 namespace Ingen.Game.Framework
 {
-	public abstract class Overlay
+	public abstract class Overlay : Scene
 	{
-		public abstract void Render(RenderTarget target);
-		public abstract void Logic();
 	}
 }
