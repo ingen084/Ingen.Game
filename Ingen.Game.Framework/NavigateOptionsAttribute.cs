@@ -5,12 +5,14 @@ namespace Ingen.Game.Framework
 	[AttributeUsage(AttributeTargets.Class)]
 	public class NavigateOptionsAttribute : Attribute
 	{
-		public NavigateOptionsAttribute(Timing timing)
+		public NavigateOptionsAttribute(Timing initalizeTiming, Timing destroyTiming)
 		{
-			Timing = timing;
+			InitalizeTiming = initalizeTiming;
+			DestroyTiming = destroyTiming;
 		}
 
-		public Timing Timing { get; }
+		public Timing InitalizeTiming { get; }
+		public Timing DestroyTiming { get; }
 	}
 	public enum Timing
 	{

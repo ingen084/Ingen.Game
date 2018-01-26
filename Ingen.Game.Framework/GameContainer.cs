@@ -18,6 +18,9 @@ namespace Ingen.Game.Framework.Navigator
 
 		public bool IsLinkFrameAndLogic { get; }
 
+		private HighPerformanceStopwatch Stopwatch { get; }
+		public TimeSpan Elapsed => Stopwatch.Elapsed;
+
 		private CancellationTokenSource TasksCancellationTokenSource;
 		private Task RenderTask;
 		private Timer LogicTimer;
@@ -44,10 +47,18 @@ namespace Ingen.Game.Framework.Navigator
 			if (!IsLinkFrameAndLogic)
 				LogicTimer = new Timer(s => Logic(), null, Timeout.Infinite, Timeout.Infinite);
 
+			Stopwatch = new HighPerformanceStopwatch();
 		}
 
 		public T Resolve<T>()
 			=> Container.Resolve<T>();
+		public void AddSingleton<T>(T instance = null) where T : class
+		{
+			if (instance == null)
+				Container.RegisterType<T>(new ContainerControlledLifetimeManager());
+			else
+				Container.RegisterInstance(instance, new ContainerControlledLifetimeManager());
+		}
 
 		public void Navigate<TScene>(LoadingScene loadingScene) where TScene : Scene
 			=> Navigate(loadingScene, Container.Resolve<TScene>());
@@ -68,6 +79,7 @@ namespace Ingen.Game.Framework.Navigator
 
 			CurrentScene.UpdateRenderTarget(GameWindow.RenderTarget);
 
+			Stopwatch.Start();
 			RenderTask.Start();
 
 			LogicTimer?.Change(0, 1000 / TpsRate);
@@ -77,6 +89,7 @@ namespace Ingen.Game.Framework.Navigator
 			TasksCancellationTokenSource.Cancel();
 			LogicTimer?.Change(Timeout.Infinite, Timeout.Infinite);
 			RenderTask.Wait();
+			Stopwatch.Stop();
 		}
 
 		public void Render()
