@@ -20,7 +20,7 @@ namespace Ingen.Game.Framework.Navigator
 
 		private CancellationTokenSource TasksCancellationTokenSource;
 		private Task RenderTask;
-		private Task LogicTask;
+		private Timer LogicTimer;
 
 		public ushort TpsRate { get; set; } = 30;
 
@@ -42,7 +42,7 @@ namespace Ingen.Game.Framework.Navigator
 			TasksCancellationTokenSource = new CancellationTokenSource();
 			RenderTask = new Task(Render, TasksCancellationTokenSource.Token, TaskCreationOptions.LongRunning);
 			if (!IsLinkFrameAndLogic)
-				LogicTask = new Task(Logic, TasksCancellationTokenSource.Token, TaskCreationOptions.LongRunning);
+				LogicTimer = new Timer(s => Logic(), null, Timeout.Infinite, Timeout.Infinite);
 
 		}
 
@@ -70,13 +70,12 @@ namespace Ingen.Game.Framework.Navigator
 
 			RenderTask.Start();
 
-			beforeTime = DateTime.Now;
-			LogicTask?.Start();
+			LogicTimer?.Change(0, 1000 / TpsRate);
 
 			GameWindow.ShowDialog();
 
 			TasksCancellationTokenSource.Cancel();
-			LogicTask?.Wait();
+			LogicTimer?.Change(Timeout.Infinite, Timeout.Infinite);
 			RenderTask.Wait();
 		}
 
@@ -91,21 +90,20 @@ namespace Ingen.Game.Framework.Navigator
 				GameWindow.EndDraw();
 			}
 		}
-		DateTime beforeTime;
+
+		bool processing = false;
 		public void Logic()
 		{
-			while (!TasksCancellationTokenSource.Token.IsCancellationRequested)
+			if (TasksCancellationTokenSource.Token.IsCancellationRequested)
 			{
-				//ロジック
-				if (!IsLinkFrameAndLogic)
-				{
-					var waitMs = (1000.0 / TpsRate) - (DateTime.Now - beforeTime).TotalMilliseconds;
-					beforeTime = DateTime.Now;
-					if (waitMs > 1)
-						Thread.Sleep((int)waitMs);
-				}
-				CurrentScene.Update();
+				LogicTimer.Change(Timeout.Infinite, Timeout.Infinite);
+				return;
 			}
+			if (processing)
+				return;
+			processing = true;
+			CurrentScene.Update();
+			processing = false;
 		}
 
 		private bool isDisposed = false;
@@ -114,6 +112,7 @@ namespace Ingen.Game.Framework.Navigator
 			if (isDisposed)
 				return;
 			isDisposed = true;
+			LogicTimer?.Dispose();
 			GameWindow?.Dispose();
 			Container?.Dispose();
 		}
