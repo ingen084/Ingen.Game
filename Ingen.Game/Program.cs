@@ -5,11 +5,6 @@ using SharpDX.Direct2D1;
 using SharpDX.DirectWrite;
 using SharpDX.Mathematics.Interop;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Ingen.Game
 {
@@ -17,7 +12,7 @@ namespace Ingen.Game
 	{
 		public static void Main()
 		{
-			using (var container = new GameContainer(false, 1280, 720) { TpsRate = 60 })
+			using (var container = new GameContainer(false, "Game Sample", 1280, 720))
 			using (var scene = container.Resolve<SampleScene>())
 				container.Start(scene);
 		}
@@ -26,10 +21,14 @@ namespace Ingen.Game
 		public class SampleScene : Scene
 		{
 			GameForm Form { get; }
+			GameContainer Container { get; }
+
 			TextFormat format;
-			public SampleScene(GameForm form)
+			public SampleScene(GameForm form, GameContainer container)
 			{
 				Form = form;
+				Container = container;
+
 				lastTime = DateTime.Now;
 				position = 10;
 				Resource.AddResource("MainBrush", new SolidColorBrushResource(new RawColor4(1, 1, 1, 1)));
@@ -38,28 +37,28 @@ namespace Ingen.Game
 			public override void UpdateRenderTarget(RenderTarget target)
 			{
 				if (format == null)
-					format = new TextFormat(Form.DWFactory, "Consolas", FontWeight.Light, FontStyle.Normal, 32);
+					format = new TextFormat(Form.DWFactory, "MS Gothic", FontWeight.Light, FontStyle.Normal, 32);
 				base.UpdateRenderTarget(target);
 			}
 
 			public override void Render()
 			{
-				RenderTarget.DrawText(lastTime.ToString("yyyy/MM/dd HH:mm:ss.fff"), format, new RawRectangleF(10, 10, 500, 500), Resource.Get<BrushResource>("MainBrush").Brush);
+				RenderTarget.DrawText(lastTime.ToString("yyyy/MM/dd HH:mm:ss.fff") + "\n" + Container.Elapsed.ToString(), format, new RawRectangleF(10, 10, 500, 500), Resource.Get<BrushResource>("MainBrush").Brush);
 				RenderTarget.FillRectangle(new RawRectangleF(position, 100, position + 100, 200), Resource.Get<BrushResource>("MainBrush").Brush);
 			}
 
 			DateTime lastTime;
 			bool direction = false;
-			int position;
+			float position;
 			public override void Update()
 			{
 				if (direction)
-					position--;
+					position -= 1.2f;
 				else
-					position++;
-				if (position > 100)
+					position += 2.4f;
+				if (position > 200)
 				{
-					position = 100;
+					position = 200;
 					direction = true;
 				}
 				if (position < 10)
@@ -73,7 +72,7 @@ namespace Ingen.Game
 
 			public override void Dispose()
 			{
-				format?.Dispose();
+				format.Dispose();
 				base.Dispose();
 			}
 		}

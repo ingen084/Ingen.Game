@@ -23,7 +23,7 @@ namespace Ingen.Game.Framework.Navigator
 
 		private CancellationTokenSource TasksCancellationTokenSource;
 		private Task RenderTask;
-		private Timer LogicTimer;
+		private Task LogicTask;
 
 		public ushort TpsRate { get; set; } = 30;
 
@@ -34,18 +34,18 @@ namespace Ingen.Game.Framework.Navigator
 			Overlays.Add(overlay);
 		}
 
-		public GameContainer(bool isLinkFrameAndLogic, int windowWidth, int windowHeight)
+		public GameContainer(bool isLinkFrameAndLogic, string windowTitle, int windowWidth, int windowHeight)
 		{
 			IsLinkFrameAndLogic = isLinkFrameAndLogic;
 
 			Container = new UnityContainer();
 			Container.RegisterInstance(this, new ContainerControlledLifetimeManager());
-			Container.RegisterInstance(GameWindow = new GameForm(IsLinkFrameAndLogic) { ClientSize = new Size(windowWidth, windowHeight) }, new ContainerControlledLifetimeManager());
+			Container.RegisterInstance(GameWindow = new GameForm() { ClientSize = new Size(windowWidth, windowHeight), Text = windowTitle }, new ContainerControlledLifetimeManager());
 
 			TasksCancellationTokenSource = new CancellationTokenSource();
 			RenderTask = new Task(Render, TasksCancellationTokenSource.Token, TaskCreationOptions.LongRunning);
 			if (!IsLinkFrameAndLogic)
-				LogicTimer = new Timer(s => Logic(), null, Timeout.Infinite, Timeout.Infinite);
+				LogicTask = new Task(Logic, TasksCancellationTokenSource.Token, TaskCreationOptions.LongRunning);
 
 			Stopwatch = new HighPerformanceStopwatch();
 		}
@@ -82,12 +82,13 @@ namespace Ingen.Game.Framework.Navigator
 			Stopwatch.Start();
 			RenderTask.Start();
 
-			LogicTimer?.Change(0, 1000 / TpsRate);
+			beforeTime = Stopwatch.Elapsed;
+			LogicTask?.Start();
 
 			GameWindow.ShowDialog();
 
 			TasksCancellationTokenSource.Cancel();
-			LogicTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+			LogicTask?.Wait();
 			RenderTask.Wait();
 			Stopwatch.Stop();
 		}
@@ -104,19 +105,20 @@ namespace Ingen.Game.Framework.Navigator
 			}
 		}
 
-		bool processing = false;
+		TimeSpan beforeTime;
 		public void Logic()
 		{
-			if (TasksCancellationTokenSource.Token.IsCancellationRequested)
+			while (!TasksCancellationTokenSource.Token.IsCancellationRequested)
 			{
-				LogicTimer.Change(Timeout.Infinite, Timeout.Infinite);
-				return;
+				if (!IsLinkFrameAndLogic)
+				{
+					var wait = (1000.0 / TpsRate) - (Stopwatch.Elapsed - beforeTime).TotalMilliseconds;
+					if (wait >= 1)
+						Thread.Sleep((int)wait);
+				}
+				beforeTime = Stopwatch.Elapsed;
+				CurrentScene.Update();
 			}
-			if (processing)
-				return;
-			processing = true;
-			CurrentScene.Update();
-			processing = false;
 		}
 
 		private bool isDisposed = false;
@@ -125,7 +127,6 @@ namespace Ingen.Game.Framework.Navigator
 			if (isDisposed)
 				return;
 			isDisposed = true;
-			LogicTimer?.Dispose();
 			GameWindow?.Dispose();
 			Container?.Dispose();
 		}

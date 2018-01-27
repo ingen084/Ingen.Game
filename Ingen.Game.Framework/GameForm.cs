@@ -1,11 +1,4 @@
 ﻿using SharpDX.Direct3D;
-using SharpDX.Mathematics.Interop;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using D2D1 = SharpDX.Direct2D1;
 using D3D11 = SharpDX.Direct3D11;
@@ -37,10 +30,8 @@ namespace Ingen.Game.Framework
 		public ref D2D1.RenderTarget RenderTarget => ref _renderTarget;
 		#endregion
 
-		private bool IsEnableVSync;
-		public GameForm(bool isEnableVSync)
+		public GameForm()
 		{
-			IsEnableVSync = isEnableVSync;
 		}
 
 		public void Initalize()
@@ -103,7 +94,7 @@ namespace Ingen.Game.Framework
 		public void EndDraw()
 		{
 			RenderTarget.EndDraw();
-			SwapChain.Present(IsEnableVSync ? 1 : 0, DXGI.PresentFlags.None);
+			SwapChain.Present(1, DXGI.PresentFlags.None);
 		}
 
 
