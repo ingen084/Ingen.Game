@@ -42,8 +42,11 @@ namespace Ingen.Game.Framework
 				if (TimeTick == 0)
 					return 0;
 				double value = (Container.Elapsed.Ticks - BaseTick) / (double)TimeTick;
-				if (value > 1 && IsLoopMode)
-					BaseTick += TimeTick * (int)Math.Floor(value);
+				if (value > 1)
+					if (IsLoopMode)
+						BaseTick += TimeTick * (int)Math.Floor(value);
+					else
+						IsStarted = false;
 				return (float)Math.Min(1.0, (Container.Elapsed.Ticks - BaseTick) / (double)TimeTick);
 			}
 		}

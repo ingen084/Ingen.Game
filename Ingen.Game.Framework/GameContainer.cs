@@ -24,7 +24,7 @@ namespace Ingen.Game.Framework
 		public ref DW.Factory DWFactory => ref _dWFactory;
 		#endregion
 
-		public Scene CurrentScene { get; private set; }
+		public Scene CurrentScene { get; set; }
 
 		public bool IsLinkFrameAndLogic { get; }
 
@@ -78,7 +78,9 @@ namespace Ingen.Game.Framework
 		}
 
 		public T Resolve<T>()
-			=> Container.BuildUp(Container.Resolve<T>());
+			=> Container.Resolve<T>();
+		public object Resolve(Type type)
+			=> Container.Resolve(type);
 		public void AddSingleton<T>(T instance = null) where T : class
 		{
 			if (instance == null)
@@ -88,13 +90,12 @@ namespace Ingen.Game.Framework
 		}
 
 		public void Navigate<TScene>(TransitionScene loadingScene) where TScene : Scene
-			=> Navigate(loadingScene, Container.Resolve<TScene>());
-		public void Navigate(TransitionScene loadingScene, Scene nextScene)
 		{
 			if (CurrentScene is TransitionScene)
 				throw new InvalidOperationException("TransitionSceneからNavigateすることはできません。");
 
-			loadingScene.Initalize(CurrentScene, nextScene);
+			loadingScene.UpdateRenderTarget(GameWindow.RenderTarget);
+			loadingScene.Initalize<TScene>(CurrentScene);
 			CurrentScene = loadingScene;
 		}
 
@@ -167,6 +168,7 @@ namespace Ingen.Game.Framework
 			if (isDisposed)
 				return;
 			isDisposed = true;
+			CurrentScene?.Dispose();
 			lock (Overlays)
 				Overlays.ForEach(o => o.Dispose());
 			GameWindow?.Dispose();

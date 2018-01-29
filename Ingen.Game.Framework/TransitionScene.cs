@@ -2,6 +2,6 @@
 {
 	public abstract class TransitionScene : Scene
 	{
-		public abstract void Initalize(Scene currentScene, Scene nextScene);
+		public abstract void Initalize<TScene>(Scene currentScene) where TScene : Scene;
 	}
 }

@@ -37,22 +37,26 @@ namespace Ingen.Game
 			if (FrameTimeQueue.Count > 120)
 				FrameTimeQueue.Dequeue();
 
-			using (var layout = new TextLayout(Container.DWFactory,
-				$"Elapsed: {Container.Elapsed.ToString(@"dd\.hh\:mm\:ss\.fff")}\n" +
-				$"FPS    : {(1000.0 / FrameTimeQueue.Average()).ToString("0.0")}\n" +
-				$"TPS    : {(1000.0 / UpdateTimeQueue.Average()).ToString("0.0")}\n" +
-				$"Scene  : {Container.CurrentScene.GetType().Name}", format, float.PositiveInfinity, float.PositiveInfinity))
-				RenderTarget.DrawTextLayout(new RawVector2(0, 720 - layout.Metrics.Height), layout, Resource.Get<BrushResource>("ForegroundBrush").Brush);
+			lock (UpdateTimeQueue)
+				using (var layout = new TextLayout(Container.DWFactory,
+					$"Elapsed: {Container.Elapsed.ToString(@"dd\.hh\:mm\:ss\.fff")}\n" +
+					$"FPS    : {(1000.0 / FrameTimeQueue.Average()).ToString("0.0")}\n" +
+					$"TPS    : {(1000.0 / UpdateTimeQueue.Average()).ToString("0.0")}\n" +
+					$"Scene  : {Container.CurrentScene.GetType().Name}", format, float.PositiveInfinity, float.PositiveInfinity))
+					RenderTarget.DrawTextLayout(new RawVector2(0, 720 - layout.Metrics.Height), layout, Resource.Get<BrushResource>("ForegroundBrush").Brush);
 		}
 
 		double beforeUpdateTime = 0;
 		public override void Update()
 		{
-			var current = Container.Elapsed.TotalMilliseconds;
-			UpdateTimeQueue.Enqueue(current - beforeUpdateTime);
-			if (UpdateTimeQueue.Count > 120)
-				UpdateTimeQueue.Dequeue();
-			beforeUpdateTime = current;
+			lock (UpdateTimeQueue)
+			{
+				var current = Container.Elapsed.TotalMilliseconds;
+				UpdateTimeQueue.Enqueue(current - beforeUpdateTime);
+				if (UpdateTimeQueue.Count > 120)
+					UpdateTimeQueue.Dequeue();
+				beforeUpdateTime = current;
+			}
 		}
 
 		public override void Dispose()

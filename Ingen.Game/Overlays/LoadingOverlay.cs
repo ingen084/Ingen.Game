@@ -37,7 +37,7 @@ namespace Ingen.Game
 
 		public override void Render()
 		{
-			if (isFadeOut && FadeAnimation.Value % 1 == 0)
+			if (isFadeOut && FadeAnimation.Value == 1)
 				return;
 
 			using (var layer = new Layer(RenderTarget))
@@ -74,15 +74,15 @@ namespace Ingen.Game
 		bool isFadeOut = true;
 		Animation FadeAnimation;
 
-		int count = 0;
+		//int count = 0;
 		public override void Update()
 		{
-			count++;
-			if (count % 60 == 0)
-				IsShown = !IsShown;
+			//count++;
+			//if (count % 60 == 0)
+			//	IsShown = !IsShown;
 		}
 
-		private bool _isShown;
+		private bool _isShown = true;
 		public bool IsShown
 		{
 			get => _isShown;

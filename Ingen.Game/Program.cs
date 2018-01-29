@@ -1,6 +1,7 @@
 ﻿using Ingen.Game.Framework;
 using Ingen.Game.Framework.Resources.Brushes;
 using Ingen.Game.Framework.Resources.Images;
+using Ingen.Game.Scenes;
 using SharpDX;
 using SharpDX.Direct2D1;
 using SharpDX.Mathematics.Interop;
@@ -14,37 +15,37 @@ namespace Ingen.Game
 		{
 			using (var container = new GameContainer(false, "Game Sample", 1280, 720) { TpsRate = 30 })
 			{
-				using (var scene = container.Resolve<SampleScene>())
-				{
-					container.AddOverlay(container.Resolve<DebugOverlay>());
-					container.AddOverlay(container.Resolve<LoadingOverlay>());
-					container.Start(scene);
-				}
+				var lo = container.Resolve<LoadingOverlay>();
+				container.AddOverlay(lo);
+				container.AddOverlay(container.Resolve<DebugOverlay>());
+				container.AddSingleton(new FadeTransitionScene(lo, container, TimeSpan.FromSeconds(.25)));
+				container.Start(container.Resolve<SampleScene>());
 			}
 		}
 
 		[NavigateOptions(Timing.Before, Timing.After)]
-		public class SampleScene : Scene
+		public sealed class SampleScene : Scene
 		{
 			public GameContainer Container { get; set; }
+			FadeTransitionScene TransitionScene { get; }
 
-			public SampleScene(GameContainer container)
+			public SampleScene(GameContainer container, FadeTransitionScene tscene)
 			{
 				Container = container;
+				TransitionScene = tscene;
 
 				lastTime = DateTime.Now;
 				position = 10;
 				Resource.AddResource("MainBrush", new SolidColorBrushResource(new RawColor4(1, 1, 1, 1)));
 				Resource.AddResource("Image", new PngImageResource(Container.ImagingFactory, @"D:\ingen\Desktop\saikoro_145.png"));
-			}
 
-			public override void UpdateRenderTarget(RenderTarget target)
-			{
-				base.UpdateRenderTarget(target);
+				System.Threading.Thread.Sleep(1000);
 			}
 
 			public override void Render()
 			{
+				RenderTarget.Clear(Color.CornflowerBlue);
+
 				RenderTarget.Transform = Matrix3x2.Rotation(position * 0.018f, new Vector2(position + 50, 150));
 				RenderTarget.DrawBitmap(Resource.Get<ImageResource>("Image").Image, new RawRectangleF(position, 100, position + 100, 200), 1, BitmapInterpolationMode.Linear);
 				RenderTarget.Transform = Matrix3x2.Identity;
@@ -68,6 +69,65 @@ namespace Ingen.Game
 				{
 					position = 10;
 					direction = false;
+					Container.Navigate<SampleScene2>(TransitionScene);
+				}
+
+				lastTime = DateTime.Now;
+			}
+
+			public override void Dispose()
+			{
+				base.Dispose();
+			}
+		}
+
+		[NavigateOptions(Timing.Before, Timing.Before)]
+		public sealed class SampleScene2 : Scene
+		{
+			public GameContainer Container { get; set; }
+			FadeTransitionScene TransitionScene { get; }
+
+			public SampleScene2(GameContainer container, FadeTransitionScene tscene)
+			{
+				Container = container;
+				TransitionScene = tscene;
+
+				lastTime = DateTime.Now;
+				position = 10;
+				Resource.AddResource("MainBrush", new SolidColorBrushResource(new RawColor4(1, 1, 1, 1)));
+				Resource.AddResource("Image", new PngImageResource(Container.ImagingFactory, @"D:\ingen\Desktop\saikoro_145.png"));
+
+				System.Threading.Thread.Sleep(3000);
+			}
+
+			public override void Render()
+			{
+				RenderTarget.Clear(Color.MediumPurple);
+
+				RenderTarget.Transform = Matrix3x2.Rotation(position * 0.018f, new Vector2(position + 100, 200));
+				RenderTarget.DrawBitmap(Resource.Get<ImageResource>("Image").Image, new RawRectangleF(position, 100, position + 200, 300), 1, BitmapInterpolationMode.Linear);
+				RenderTarget.Transform = Matrix3x2.Identity;
+			}
+
+			DateTime lastTime;
+			bool direction = false;
+			float position;
+			public override void Update()
+			{
+				if (direction)
+					position -= 1.2f;
+				else
+					position += 2.4f;
+				if (position > 200)
+				{
+					position = 200;
+					direction = true;
+				}
+				if (position < 10)
+				{
+					position = 10;
+					direction = false;
+					Container.Navigate<SampleScene>(TransitionScene);
 				}
 
 				lastTime = DateTime.Now;

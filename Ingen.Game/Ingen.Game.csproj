@@ -40,9 +40,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="DebugOverlay.cs" />
-    <Compile Include="LoadingOverlay.cs" />
+    <Compile Include="Overlays\DebugOverlay.cs" />
+    <Compile Include="Overlays\LoadingOverlay.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Scenes\FadeTransitionScene.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Ingen.Game.Framework\Ingen.Game.Framework.csproj">
@@ -89,5 +90,6 @@
       <HintPath>..\packages\Unity.5.5.6\lib\net47\Unity.ServiceLocation.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

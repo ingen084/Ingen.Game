@@ -18,11 +18,13 @@ namespace Ingen.Game.Framework
 	public enum Timing
 	{
 		/// <summary>
-		/// 次シーン移行前に破棄(ロード画面挟む)/生成
+		/// 次シーン移行前に破棄(ロード画面挟む)
+		/// <para>ロード画面移行前に生成</para>
 		/// </summary>
 		Before,
 		/// <summary>
-		/// 次シーン移行後に破棄/生成(ロード画面挟む)
+		/// 次シーン移行後に破棄
+		/// <para>ロード画面移行後に生成(ロード画面挟む)</para>
 		/// </summary>
 		After,
 	}

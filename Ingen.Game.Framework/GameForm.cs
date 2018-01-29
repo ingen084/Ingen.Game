@@ -1,4 +1,5 @@
-﻿using SharpDX.Direct3D;
+﻿using SharpDX;
+using SharpDX.Direct3D;
 using System.Windows.Forms;
 using D2D1 = SharpDX.Direct2D1;
 using D3D11 = SharpDX.Direct3D11;
@@ -52,7 +53,7 @@ namespace Ingen.Game.Framework
 			};
 
 			// Create Device and SwapChain
-			D3D11.Device.CreateWithSwapChain(DriverType.Hardware, D3D11.DeviceCreationFlags.BgraSupport, new[] { FeatureLevel.Level_10_0 }, desc, out D3D11Device, out SwapChain);
+			D3D11.Device.CreateWithSwapChain(DriverType.Hardware, D3D11.DeviceCreationFlags.BgraSupport, new[] { FeatureLevel.Level_9_3 }, desc, out D3D11Device, out SwapChain);
 
 			// Ignore all windows events
 			using (DXGI.Factory factory = SwapChain.GetParent<DXGI.Factory>())
@@ -80,7 +81,6 @@ namespace Ingen.Game.Framework
 			D3D11Device.ImmediateContext.OutputMerger.SetTargets(_backBufferView);
 
 			RenderTarget.BeginDraw();
-			RenderTarget.Clear(null);
 		}
 		public void EndDraw()
 		{
