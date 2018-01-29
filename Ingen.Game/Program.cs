@@ -18,8 +18,10 @@ namespace Ingen.Game
 				var lo = container.Resolve<LoadingOverlay>();
 				container.AddOverlay(lo);
 				container.AddOverlay(container.Resolve<DebugOverlay>());
-				container.AddSingleton(new FadeTransitionScene(lo, container, TimeSpan.FromSeconds(.25)));
-				container.Start(container.Resolve<SampleScene>());
+				var ts = new FadeTransitionScene(lo, container, TimeSpan.FromSeconds(.25));
+				container.AddSingleton(ts);
+				ts.Initalize<SampleScene>(null);
+				container.Start(ts);
 			}
 		}
 

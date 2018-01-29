@@ -19,7 +19,7 @@ namespace Ingen.Game
 		public LoadingOverlay(GameContainer container)
 		{
 			Resource.AddResource("Fore", new SolidColorBrushResource(new RawColor4(1, 0.64705882352941176470588235294118f, 0, 1)));
-			Resource.AddResource("Back", new SolidColorBrushResource(new RawColor4(1, 0.64705882352941176470588235294118f, 0, .2f)));
+			Resource.AddResource("Back", new SolidColorBrushResource(new RawColor4(1, 1, 1, .3f)));
 			format = new TextFormat(container.DWFactory, "Nishiki-teki", 32);
 
 			Container = container;
@@ -73,13 +73,9 @@ namespace Ingen.Game
 		Animation LoopAnimation;
 		bool isFadeOut = true;
 		Animation FadeAnimation;
-
-		//int count = 0;
+		
 		public override void Update()
 		{
-			//count++;
-			//if (count % 60 == 0)
-			//	IsShown = !IsShown;
 		}
 
 		private bool _isShown = true;

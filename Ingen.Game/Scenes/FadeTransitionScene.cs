@@ -53,8 +53,6 @@ namespace Ingen.Game.Scenes
 		private State CurrentState;
 
 		bool isNeedLoadingScreen;
-		Timing DisposeTiming;
-		Timing InitalizeTiming;
 
 		Scene CurrentScene;
 
@@ -63,14 +61,21 @@ namespace Ingen.Game.Scenes
 
 		public override void Initalize<TScene>(Scene currentScene)
 		{
-			CurrentState = State.Neutral;
-
-			DisposeTiming = currentScene.GetType().GetNavigateOptionsAttribute()?.DestroyTiming ?? Timing.Before;
-			InitalizeTiming = typeof(TScene).GetNavigateOptionsAttribute()?.InitalizeTiming ?? Timing.After;
-
 			CurrentScene = currentScene;
 			NewSceneType = typeof(TScene);
 			NewScene = null;
+
+			if(currentScene== null)
+			{
+				CurrentState = State.FadingToLoadScreen;
+				isNeedLoadingScreen = true;
+				return;
+			}
+
+			CurrentState = State.Neutral;
+
+			var DisposeTiming = currentScene.GetType().GetNavigateOptionsAttribute()?.DestroyTiming ?? Timing.Before;
+			var InitalizeTiming = typeof(TScene).GetNavigateOptionsAttribute()?.InitalizeTiming ?? Timing.After;
 
 			isNeedLoadingScreen = (DisposeTiming == Timing.Before || InitalizeTiming == Timing.After);
 		}
@@ -122,7 +127,7 @@ namespace Ingen.Game.Scenes
 		}
 		private void RenderLoadingScreen()
 		{
-			RenderTarget.Clear(Color.Blue);
+			RenderTarget.Clear(Color.Black);
 		}
 
 		public override void Update()
@@ -155,7 +160,7 @@ namespace Ingen.Game.Scenes
 					Overlay.IsShown = true;
 					SceneWorkTask = Task.Run(() =>
 					{
-						CurrentScene.Dispose();
+						CurrentScene?.Dispose();
 						CurrentScene = null;
 						NewScene = (Scene)Container.Resolve(NewSceneType);
 						NewScene.UpdateRenderTarget(RenderTarget);
