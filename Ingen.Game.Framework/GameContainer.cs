@@ -1,12 +1,15 @@
-﻿using System;
+﻿using Ingen.Game.Framework.Resources;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 using Unity;
 using Unity.Lifetime;
+using DW = SharpDX.DirectWrite;
+using WIC = SharpDX.WIC;
 
-namespace Ingen.Game.Framework.Navigator
+namespace Ingen.Game.Framework
 {
 	public class GameContainer : IDisposable
 	{
@@ -14,12 +17,24 @@ namespace Ingen.Game.Framework.Navigator
 
 		public GameForm GameWindow { get; }
 
+		#region DW/WIC
+		WIC.ImagingFactory _imagingFactory;
+		public ref WIC.ImagingFactory ImagingFactory => ref _imagingFactory;
+		DW.Factory _dWFactory;
+		public ref DW.Factory DWFactory => ref _dWFactory;
+		#endregion
+
 		public Scene CurrentScene { get; private set; }
 
 		public bool IsLinkFrameAndLogic { get; }
 
 		private HighPerformanceStopwatch Stopwatch { get; }
 		public TimeSpan Elapsed => Stopwatch.Elapsed;
+
+		public ResourceLoader GlobalResource { get; }
+
+		public int WindowWidth { get; set; }
+		public int WindowHeight { get; set; }
 
 		private CancellationTokenSource TasksCancellationTokenSource;
 		private Task RenderTask;
@@ -30,7 +45,14 @@ namespace Ingen.Game.Framework.Navigator
 		private List<Overlay> Overlays { get; } = new List<Overlay>();
 		public void AddOverlay(Overlay overlay)
 		{
-			overlay.UpdateRenderTarget(GameWindow.RenderTarget);
+			if (GameWindow?.RenderTarget != null)
+				overlay.UpdateRenderTarget(GameWindow.RenderTarget);
+			for (var i = 0; i < Overlays.Count; i++)
+				if (overlay.Priority <= Overlays[i].Priority)
+				{
+					Overlays.Insert(i, overlay);
+					return;
+				}
 			Overlays.Add(overlay);
 		}
 
@@ -38,34 +60,39 @@ namespace Ingen.Game.Framework.Navigator
 		{
 			IsLinkFrameAndLogic = isLinkFrameAndLogic;
 
+			WindowWidth = windowWidth;
+			WindowHeight = windowHeight;
+
 			Container = new UnityContainer();
-			Container.RegisterInstance(this, new ContainerControlledLifetimeManager());
-			Container.RegisterInstance(GameWindow = new GameForm() { ClientSize = new Size(windowWidth, windowHeight), Text = windowTitle }, new ContainerControlledLifetimeManager());
+			AddSingleton(this);
+			AddSingleton(GameWindow = new GameForm() { ClientSize = new Size(windowWidth, windowHeight), Text = windowTitle });
+			AddSingleton(DWFactory = new DW.Factory());
+			AddSingleton(ImagingFactory = new WIC.ImagingFactory());
+			AddSingleton(Stopwatch = new HighPerformanceStopwatch());
+			AddSingleton(GlobalResource = new ResourceLoader());
 
 			TasksCancellationTokenSource = new CancellationTokenSource();
 			RenderTask = new Task(Render, TasksCancellationTokenSource.Token, TaskCreationOptions.LongRunning);
 			if (!IsLinkFrameAndLogic)
 				LogicTask = new Task(Logic, TasksCancellationTokenSource.Token, TaskCreationOptions.LongRunning);
-
-			Stopwatch = new HighPerformanceStopwatch();
 		}
 
 		public T Resolve<T>()
-			=> Container.Resolve<T>();
+			=> Container.BuildUp(Container.Resolve<T>());
 		public void AddSingleton<T>(T instance = null) where T : class
 		{
 			if (instance == null)
-				Container.RegisterType<T>(new ContainerControlledLifetimeManager());
+				Container.RegisterSingleton<T>();
 			else
 				Container.RegisterInstance(instance, new ContainerControlledLifetimeManager());
 		}
 
-		public void Navigate<TScene>(LoadingScene loadingScene) where TScene : Scene
+		public void Navigate<TScene>(TransitionScene loadingScene) where TScene : Scene
 			=> Navigate(loadingScene, Container.Resolve<TScene>());
-		public void Navigate(LoadingScene loadingScene, Scene nextScene)
+		public void Navigate(TransitionScene loadingScene, Scene nextScene)
 		{
-			if (CurrentScene is LoadingScene)
-				throw new InvalidOperationException("LoadingSceneからNavigateすることはできません。");
+			if (CurrentScene is TransitionScene)
+				throw new InvalidOperationException("TransitionSceneからNavigateすることはできません。");
 
 			loadingScene.Initalize(CurrentScene, nextScene);
 			CurrentScene = loadingScene;
@@ -75,14 +102,16 @@ namespace Ingen.Game.Framework.Navigator
 		{
 			CurrentScene = startupScene;
 			GameWindow.Initalize();
-			Container.RegisterInstance(GameWindow.DWFactory, new ContainerControlledLifetimeManager());
 
+			GlobalResource.UpdateRenderTarget(GameWindow.RenderTarget);
 			CurrentScene.UpdateRenderTarget(GameWindow.RenderTarget);
+
+			Overlays.ForEach(o => o.UpdateRenderTarget(GameWindow.RenderTarget));
 
 			Stopwatch.Start();
 			RenderTask.Start();
 
-			beforeTime = Stopwatch.Elapsed;
+			beforeLogicTime = Stopwatch.Elapsed;
 			LogicTask?.Start();
 
 			GameWindow.ShowDialog();
@@ -93,31 +122,42 @@ namespace Ingen.Game.Framework.Navigator
 			Stopwatch.Stop();
 		}
 
-		public void Render()
+		TimeSpan beforeRenderTime;
+		void Render()
 		{
 			while (!TasksCancellationTokenSource.Token.IsCancellationRequested)
 			{
+				var wait = (1000.0 / 60) - (Stopwatch.Elapsed - beforeRenderTime).TotalMilliseconds;
+				if (wait >= 1)
+					Thread.Sleep((int)wait);
+				beforeRenderTime = Stopwatch.Elapsed;
+
 				if (IsLinkFrameAndLogic)
+				{
 					CurrentScene.Update();
+					Overlays.ForEach(o => o.Update());
+				}
+				if (GameWindow.WindowState == System.Windows.Forms.FormWindowState.Minimized)
+					continue;
 				GameWindow.BeginDraw();
 				CurrentScene.Render();
+				Overlays.ForEach(o => o.Render());
 				GameWindow.EndDraw();
 			}
 		}
 
-		TimeSpan beforeTime;
-		public void Logic()
+		TimeSpan beforeLogicTime;
+		void Logic()
 		{
 			while (!TasksCancellationTokenSource.Token.IsCancellationRequested)
 			{
-				if (!IsLinkFrameAndLogic)
-				{
-					var wait = (1000.0 / TpsRate) - (Stopwatch.Elapsed - beforeTime).TotalMilliseconds;
-					if (wait >= 1)
-						Thread.Sleep((int)wait);
-				}
-				beforeTime = Stopwatch.Elapsed;
+				var wait = (1000.0 / TpsRate) - (Stopwatch.Elapsed - beforeLogicTime).TotalMilliseconds;
+				if (wait >= 1)
+					Thread.Sleep((int)wait);
+				beforeLogicTime = Stopwatch.Elapsed;
+
 				CurrentScene.Update();
+				Overlays.ForEach(o => o.Update());
 			}
 		}
 
@@ -127,6 +167,8 @@ namespace Ingen.Game.Framework.Navigator
 			if (isDisposed)
 				return;
 			isDisposed = true;
+			lock (Overlays)
+				Overlays.ForEach(o => o.Dispose());
 			GameWindow?.Dispose();
 			Container?.Dispose();
 		}

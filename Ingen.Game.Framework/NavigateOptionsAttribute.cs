@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 
 namespace Ingen.Game.Framework
 {
@@ -24,5 +25,11 @@ namespace Ingen.Game.Framework
 		/// 次シーン移行後に破棄/生成(ロード画面挟む)
 		/// </summary>
 		After,
+	}
+
+	public static class TypeExtensions
+	{
+		public static NavigateOptionsAttribute GetNavigateOptionsAttribute(this Type type)
+			=> type.GetTypeInfo().GetCustomAttribute<NavigateOptionsAttribute>();
 	}
 }

@@ -1,8 +1,8 @@
 ﻿using Ingen.Game.Framework;
-using Ingen.Game.Framework.Navigator;
 using Ingen.Game.Framework.Resources.Brushes;
+using Ingen.Game.Framework.Resources.Images;
+using SharpDX;
 using SharpDX.Direct2D1;
-using SharpDX.DirectWrite;
 using SharpDX.Mathematics.Interop;
 using System;
 
@@ -12,39 +12,42 @@ namespace Ingen.Game
 	{
 		public static void Main()
 		{
-			using (var container = new GameContainer(false, "Game Sample", 1280, 720))
-			using (var scene = container.Resolve<SampleScene>())
-				container.Start(scene);
+			using (var container = new GameContainer(false, "Game Sample", 1280, 720) { TpsRate = 30 })
+			{
+				using (var scene = container.Resolve<SampleScene>())
+				{
+					container.AddOverlay(container.Resolve<DebugOverlay>());
+					container.AddOverlay(container.Resolve<LoadingOverlay>());
+					container.Start(scene);
+				}
+			}
 		}
 
 		[NavigateOptions(Timing.Before, Timing.After)]
 		public class SampleScene : Scene
 		{
-			GameForm Form { get; }
-			GameContainer Container { get; }
+			public GameContainer Container { get; set; }
 
-			TextFormat format;
-			public SampleScene(GameForm form, GameContainer container)
+			public SampleScene(GameContainer container)
 			{
-				Form = form;
 				Container = container;
 
 				lastTime = DateTime.Now;
 				position = 10;
 				Resource.AddResource("MainBrush", new SolidColorBrushResource(new RawColor4(1, 1, 1, 1)));
+				Resource.AddResource("Image", new PngImageResource(Container.ImagingFactory, @"D:\ingen\Desktop\saikoro_145.png"));
 			}
 
 			public override void UpdateRenderTarget(RenderTarget target)
 			{
-				if (format == null)
-					format = new TextFormat(Form.DWFactory, "MS Gothic", FontWeight.Light, FontStyle.Normal, 32);
 				base.UpdateRenderTarget(target);
 			}
 
 			public override void Render()
 			{
-				RenderTarget.DrawText(lastTime.ToString("yyyy/MM/dd HH:mm:ss.fff") + "\n" + Container.Elapsed.ToString(), format, new RawRectangleF(10, 10, 500, 500), Resource.Get<BrushResource>("MainBrush").Brush);
-				RenderTarget.FillRectangle(new RawRectangleF(position, 100, position + 100, 200), Resource.Get<BrushResource>("MainBrush").Brush);
+				RenderTarget.Transform = Matrix3x2.Rotation(position * 0.018f, new Vector2(position + 50, 150));
+				RenderTarget.DrawBitmap(Resource.Get<ImageResource>("Image").Image, new RawRectangleF(position, 100, position + 100, 200), 1, BitmapInterpolationMode.Linear);
+				RenderTarget.Transform = Matrix3x2.Identity;
 			}
 
 			DateTime lastTime;
@@ -72,7 +75,6 @@ namespace Ingen.Game
 
 			public override void Dispose()
 			{
-				format.Dispose();
 				base.Dispose();
 			}
 		}

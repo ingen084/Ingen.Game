@@ -1,6 +1,7 @@
 ﻿using Ingen.Game.Framework.Resources;
 using SharpDX.Direct2D1;
 using System;
+using Unity.Attributes;
 
 namespace Ingen.Game.Framework
 {

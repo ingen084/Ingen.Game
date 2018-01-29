@@ -2,7 +2,6 @@
 using System.Windows.Forms;
 using D2D1 = SharpDX.Direct2D1;
 using D3D11 = SharpDX.Direct3D11;
-using DW = SharpDX.DirectWrite;
 using DXGI = SharpDX.DXGI;
 
 namespace Ingen.Game.Framework
@@ -24,10 +23,8 @@ namespace Ingen.Game.Framework
 		public ref D2D1.DeviceContext D2D1DeviceContext => ref _d2d1DeviceContext;
 		D2D1.Factory1 _d2D1Factory;
 		public ref D2D1.Factory1 D2D1Factory => ref _d2D1Factory;
-		DW.Factory _dWFactory;
-		public ref DW.Factory DWFactory => ref _dWFactory;
-		D2D1.RenderTarget _renderTarget;
 		public ref D2D1.RenderTarget RenderTarget => ref _renderTarget;
+		D2D1.RenderTarget _renderTarget;
 		#endregion
 
 		public GameForm()
@@ -74,12 +71,6 @@ namespace Ingen.Game.Framework
 				D2D1DeviceContext = new D2D1.DeviceContext(surface);
 			}
 			RenderTarget.AntialiasMode = D2D1.AntialiasMode.PerPrimitive;
-
-			DWFactory = new DW.Factory();
-
-			//using (var dxgiDevice = D3D11Device.QueryInterface<DXGI.Device>())
-			//using (var d2d1Device = new D2D1.Device(dxgiDevice))
-			//	D2D1DeviceContext = new D2D1.DeviceContext(d2d1Device, D2D1.DeviceContextOptions.EnableMultithreadedOptimizations);
 			#endregion
 		}
 
@@ -94,7 +85,7 @@ namespace Ingen.Game.Framework
 		public void EndDraw()
 		{
 			RenderTarget.EndDraw();
-			SwapChain.Present(1, DXGI.PresentFlags.None);
+			SwapChain.Present(1, DXGI.PresentFlags.UseDuration);
 		}
 
 
@@ -106,7 +97,6 @@ namespace Ingen.Game.Framework
 			BackBufferView?.Dispose();
 
 			D2D1Factory?.Dispose();
-			DWFactory?.Dispose();
 			RenderTarget?.Dispose();
 			D2D1DeviceContext?.Dispose();
 			base.Dispose(disposing);

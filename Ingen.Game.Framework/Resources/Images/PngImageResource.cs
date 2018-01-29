@@ -6,7 +6,7 @@ namespace Ingen.Game.Framework.Resources.Images
 {
 	public class PngImageResource : ImageResource
 	{
-		public PngImageResource(WIC.ImagingFactory imagingFactory, RenderTarget target, string path)
+		public PngImageResource(WIC.ImagingFactory imagingFactory, string path)
 		{
 			using (var decoder = new WIC.PngBitmapDecoder(imagingFactory))
 			{
