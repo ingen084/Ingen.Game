@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2024
+VisualStudioVersion = 15.0.27130.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ingen.Game", "Ingen.Game\Ingen.Game.csproj", "{31B18089-2F04-4E36-B7E2-F5B47E696ACF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ingen.Game.Framework", "Ingen.Game.Framework\Ingen.Game.Framework.csproj", "{AD0AC3E1-04F2-4570-9A89-6CA87F7F2B78}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ingen.Game.Data", "Ingen.Game.Data\Ingen.Game.Data.csproj", "{75BC743C-DB01-4736-8DC0-8995CF79FCBF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{AD0AC3E1-04F2-4570-9A89-6CA87F7F2B78}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD0AC3E1-04F2-4570-9A89-6CA87F7F2B78}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD0AC3E1-04F2-4570-9A89-6CA87F7F2B78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75BC743C-DB01-4736-8DC0-8995CF79FCBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75BC743C-DB01-4736-8DC0-8995CF79FCBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75BC743C-DB01-4736-8DC0-8995CF79FCBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75BC743C-DB01-4736-8DC0-8995CF79FCBF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
