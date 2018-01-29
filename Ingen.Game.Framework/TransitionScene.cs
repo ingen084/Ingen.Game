@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Ingen.Game.Framework
+﻿namespace Ingen.Game.Framework
 {
 	public abstract class TransitionScene : Scene
 	{
