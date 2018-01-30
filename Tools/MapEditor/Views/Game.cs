@@ -14,56 +14,69 @@ namespace MapEditor.Views
 	public class Game : D2dImage
 	{
 		TextFormat format;
+		PathGeometry geo;
 		public Game()
 		{
 			ResourceCache.Add("FrameBrush", t => new SolidColorBrush(t, Color.White));
 
-			format = new TextFormat(DirectWriteFactory, "MS Gothic", FontWeight.Bold, FontStyle.Normal, 15);
+			format = new TextFormat(DirectWriteFactory, "MS Gothic", 15);
+
+			//geo = new PathGeometry(D2dFactory);
+			//using (var sink = geo.Open())
+			//{
+			//	sink.BeginFigure(new Vector2(0, 10), FigureBegin.Filled);
+			//	sink.AddLine(new Vector2(TileWidth / 2, TileHeight / 2));
+			//	sink.AddLine(new Vector2(0, 10 + TileHeight));
+			//	sink.AddLine(new Vector2(TileWidth / 2, TileHeight / 2));
+			//	sink.EndFigure(FigureEnd.Closed);
+			//	sink.Close();
+			//}
+
 		}
 
 		int[,] SampleMap =
 		{
-			{ 0, 0, 0, 0 },
-			{ 0, 1, 1, 0 },
-			{ 0, 1, 1, 0 },
-			{ 0, 0, 0, 0 },
+			{ 0, 0, 0, 0, 1 },
+			{ 0, 1, 1, 0, 1 },
+			{ 0, 1, 1, 0, 1 },
+			{ 0, 0, 0, 0, 1 },
 		};
+
+		const int XOffset = 400;
+		const int YOffset = 0;
+
+		const int TileWidth = 200;
+		const int TileHeight = 150;
+		const double Slope = .75;
+
 		public override void Render(RenderTarget target)
 		{
 			target.Clear(null);
 
-			const int XOffset = 400;
-			const int YOffset = 0;
+			target.DrawText("モード: タイル設置", format, new RectangleF(5, 5, float.PositiveInfinity, float.PositiveInfinity), ResourceCache["FrameBrush"]);
 
-			const int TileWidth = 200;
-			const float TileHeight = 150;
-			const double Slope = .5;
-
-			target.DrawText("hello", format, new RectangleF(5, 5, float.PositiveInfinity, float.PositiveInfinity), ResourceCache["FrameBrush"]);
-
-			for (int x = 0; x < SampleMap.GetLength(0) + 1; x++)
+			for (int x = 0; x < SampleMap.GetLength(1) + 1; x++)
 				target.DrawLine(
 					new Vector2(ToRawX(x * 0.5 * TileWidth + XOffset), ToRawY(x * 0.5 * TileHeight + YOffset)),
-					new Vector2(ToRawX((x * 0.5 - SampleMap.GetLength(1) * 0.5) * TileWidth + XOffset), ToRawY((x * 0.5 + SampleMap.GetLength(1) * 0.5) * TileHeight + YOffset)), ResourceCache["FrameBrush"]);
+					new Vector2(ToRawX((x * 0.5 - SampleMap.GetLength(0) * 0.5) * TileWidth + XOffset), ToRawY((x * 0.5 + SampleMap.GetLength(0) * 0.5) * TileHeight + YOffset)), ResourceCache["FrameBrush"]);
 
-			for (int y = 0; y < SampleMap.GetLength(1) + 1; y++)
+			for (int y = 0; y < SampleMap.GetLength(0) + 1; y++)
 				target.DrawLine(
 					new Vector2(ToRawX(-y * 0.5 * TileWidth + XOffset), ToRawY(y * 0.5 * TileHeight + YOffset)),
-					new Vector2(ToRawX((-y * 0.5 + SampleMap.GetLength(0) * 0.5) * TileWidth + XOffset), ToRawY((y * 0.5 + SampleMap.GetLength(0) * 0.5) * TileHeight + YOffset)), ResourceCache["FrameBrush"]);
+					new Vector2(ToRawX((SampleMap.GetLength(1) * 0.5 - y * 0.5) * TileWidth + XOffset), ToRawY((SampleMap.GetLength(1) * 0.5 + y * 0.5) * TileHeight + YOffset)), ResourceCache["FrameBrush"]);
 
-			//using (var geo = new PathGeometry(D2dFactory))
-			//{
-			//	using (var sink = geo.Open())
-			//	{
-			//		sink.BeginFigure(new Vector2(150, 10), FigureBegin.Filled);
-			//		sink.AddLine(new Vector2(150 + TileWidth / 2, 10 + TileHeight / 2));
-			//		sink.AddLine(new Vector2(150, 10 + TileHeight));
-			//		sink.AddLine(new Vector2(150 - TileWidth / 2, 10 + TileHeight / 2));
-			//		sink.EndFigure(FigureEnd.Closed);
-			//		sink.Close();
-			//	}
-			//	target.FillGeometry(geo, ResourceCache["FrameBrush"]);
-			//}
+			//上から描画していくループ
+			var height = SampleMap.GetLength(0) + SampleMap.GetLength(1) - 1;
+			for (var h = 0; h < height; ++h)
+			{
+				int mx = Math.Max(0, h - SampleMap.GetLength(0) - 1), my = Math.Min(SampleMap.GetLength(1) - 1, h);
+				for (int x = mx, y = h - mx; x <= my; ++x, --y)
+				{
+					if (y > SampleMap.GetLength(0) - 1) continue;
+
+					target.DrawText($"{h}:{x},{y}", format, new RectangleF(ToRawX((x * 0.5 - y * 0.5) * TileWidth + XOffset), ToRawY((x * 0.5 + y * 0.5) * TileHeight + YOffset + TileHeight * 0.5), float.PositiveInfinity, float.PositiveInfinity), ResourceCache["FrameBrush"]);
+				}
+			}
 
 			//for (int x = 0; x < SampleMap.GetLength(0); x++)
 			//	for (int y = 0; y < SampleMap.GetLength(1); y++)

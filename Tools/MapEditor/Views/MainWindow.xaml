@@ -15,13 +15,34 @@
 		<Grid Grid.Column="1">
 			<Button Content="開く" Margin="5" Width="50" Height="24" VerticalAlignment="Top" HorizontalAlignment="Left"/>
 			<Button Content="保存" Margin="5" Width="50" Height="24" VerticalAlignment="Top" HorizontalAlignment="Right"/>
-			
-			<TextBox HorizontalAlignment="Stretch" Height="23" Margin="50,38,10,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top"/>
-			<Label Content="高さ" HorizontalAlignment="Left" Margin="10,34,0,0" VerticalAlignment="Top"/>
-			
-			<TextBox HorizontalAlignment="Stretch" Height="23" Margin="50,68,10,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top"/>
-			<Label Content="幅" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top"/>
 
+
+			<TabControl Margin="0,34,0,0">
+				<TabItem Header="基本設定">
+					<Grid>
+						<TextBox HorizontalAlignment="Stretch" Height="23" Margin="50,5,10,0" TextWrapping="Wrap" Text="試験場" VerticalAlignment="Top"/>
+						<Label Content="名前" HorizontalAlignment="Left" Margin="10,1,0,0" VerticalAlignment="Top"/>
+
+						<TextBox HorizontalAlignment="Stretch" Height="23" Margin="50,35,10,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top"/>
+						<Label Content="高さ" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top"/>
+
+						<TextBox HorizontalAlignment="Stretch" Height="23" Margin="50,65,10,0" TextWrapping="Wrap" Text="10" VerticalAlignment="Top"/>
+						<Label Content="幅" HorizontalAlignment="Left" Margin="10,61,0,0" VerticalAlignment="Top"/>
+					</Grid>
+				</TabItem>
+				<TabItem Header="配置">
+					<StackPanel>
+						<RadioButton Content="空(消去)" Margin="0,10" />
+						<RadioButton Content="効果なし" />
+						<RadioButton Content="ボーナス" />
+						<RadioButton Content="カード" >
+						</RadioButton>
+					</StackPanel>
+				</TabItem>
+				<TabItem Header="進行設定">
+
+				</TabItem>
+			</TabControl>
 		</Grid>
 	</Grid>
 </Window>

@@ -15,13 +15,26 @@ namespace Ingen.Game.Data.MapTip
 		Blank,
 
 		/// <summary>
-		/// ボーナスマス
+		/// ホーム
+		/// </summary>
+		Home,
+		/// <summary>
+		/// ボス
+		/// </summary>
+		Boss,
+
+		/// <summary>
+		/// ボーナス
 		/// </summary>
 		Bonus,
 		/// <summary>
 		/// カードドロップ
 		/// </summary>
 		Card,
+		/// <summary>
+		/// バトル
+		/// </summary>
+		Battle,
 		/// <summary>
 		/// ムーブ
 		/// </summary>
@@ -40,6 +53,10 @@ namespace Ingen.Game.Data.MapTip
 		/// </summary>
 		Card2x,
 		/// <summary>
+		/// 2xバトル
+		/// </summary>
+		Battle2x,
+		/// <summary>
 		/// ムーブ
 		/// </summary>
 		Move2x,
@@ -47,10 +64,5 @@ namespace Ingen.Game.Data.MapTip
 		/// ワープ
 		/// </summary>
 		Warp2x,
-
-		/// <summary>
-		/// ボス
-		/// </summary>
-		Boss,
 	}
 }
