@@ -1,5 +1,5 @@
 ﻿using Ingen.Game.Framework;
-using Ingen.Game.Framework.Resources.Brushes;
+using Ingen.Game.Framework.Resources;
 using Ingen.Game.Framework.Resources.Images;
 using Ingen.Game.Scenes;
 using SharpDX;
@@ -13,7 +13,7 @@ namespace Ingen.Game
 	{
 		public static void Main()
 		{
-			using (var container = new GameContainer(false, "Game Sample", 1280, 720) { TpsRate = 30 })
+			using (var container = new GameContainer(true, "Game Sample", 1280, 720) { TpsRate = 30 })
 			{
 				var lo = container.Resolve<LoadingOverlay>();
 				container.AddOverlay(lo);
@@ -38,10 +38,10 @@ namespace Ingen.Game
 
 				lastTime = DateTime.Now;
 				position = 10;
-				Resource.AddResource("MainBrush", new SolidColorBrushResource(new RawColor4(1, 1, 1, 1)));
-				Resource.AddResource("Image", new PngImageResource(Container.ImagingFactory, @"D:\ingen\Desktop\saikoro_145.png"));
+				Resource.AddSolidColorBrushResource("MainBrush", new RawColor4(1, 1, 1, 1));
+				Resource.AddPngImageResource("Image", Container.ImagingFactory, @"D:\ingen\Desktop\saikoro_145.png");
 
-				System.Threading.Thread.Sleep(1000);
+				//System.Threading.Thread.Sleep(1000);
 			}
 
 			public override void Render()
@@ -49,7 +49,7 @@ namespace Ingen.Game
 				RenderTarget.Clear(Color.CornflowerBlue);
 
 				RenderTarget.Transform = Matrix3x2.Rotation(position * 0.018f, new Vector2(position + 50, 150));
-				RenderTarget.DrawBitmap(Resource.Get<ImageResource>("Image").Image, new RawRectangleF(position, 100, position + 100, 200), 1, BitmapInterpolationMode.Linear);
+				RenderTarget.DrawBitmap(Resource, "Image", new RawRectangleF(position, 100, position + 100, 200));
 				RenderTarget.Transform = Matrix3x2.Identity;
 			}
 
@@ -96,10 +96,10 @@ namespace Ingen.Game
 
 				lastTime = DateTime.Now;
 				position = 10;
-				Resource.AddResource("MainBrush", new SolidColorBrushResource(new RawColor4(1, 1, 1, 1)));
-				Resource.AddResource("Image", new PngImageResource(Container.ImagingFactory, @"D:\ingen\Desktop\saikoro_145.png"));
+				Resource.AddSolidColorBrushResource("MainBrush", new RawColor4(1, 1, 1, 1));
+				Resource.AddPngImageResource("Image", Container.ImagingFactory, @"D:\ingen\Desktop\saikoro_145.png");
 
-				System.Threading.Thread.Sleep(3000);
+				//System.Threading.Thread.Sleep(3000);
 			}
 
 			public override void Render()
@@ -107,7 +107,7 @@ namespace Ingen.Game
 				RenderTarget.Clear(Color.MediumPurple);
 
 				RenderTarget.Transform = Matrix3x2.Rotation(position * 0.018f, new Vector2(position + 100, 200));
-				RenderTarget.DrawBitmap(Resource.Get<ImageResource>("Image").Image, new RawRectangleF(position, 100, position + 200, 300), 1, BitmapInterpolationMode.Linear);
+				RenderTarget.DrawBitmap(Resource, "Image", new RawRectangleF(position, 100, position + 200, 300));
 				RenderTarget.Transform = Matrix3x2.Identity;
 			}
 
@@ -119,10 +119,10 @@ namespace Ingen.Game
 				if (direction)
 					position -= 1.2f;
 				else
-					position += 2.4f;
-				if (position > 200)
+					position += 3.4f;
+				if (position > 500)
 				{
-					position = 200;
+					position = 500;
 					direction = true;
 				}
 				if (position < 10)

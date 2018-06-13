@@ -85,6 +85,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Animation.cs" />
+    <Compile Include="Resources\Extensions.cs" />
     <Compile Include="GameForm.cs">
       <SubType>Form</SubType>
     </Compile>

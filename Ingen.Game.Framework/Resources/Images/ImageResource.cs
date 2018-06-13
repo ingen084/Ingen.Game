@@ -6,20 +6,20 @@ namespace Ingen.Game.Framework.Resources.Images
 {
 	public abstract class ImageResource : IResource
 	{
-		Bitmap _bitmap;
-		public Bitmap Image => _bitmap;
+		public Bitmap Image { get; private set; }
+
 		protected WIC.FormatConverter FormatConverter;
 
 		public void UpdateRenderTarget(RenderTarget target)
 		{
-			_bitmap?.Dispose();
-			_bitmap = Bitmap.FromWicBitmap(target, FormatConverter, new BitmapProperties(new PixelFormat(DXGI.Format.R8G8B8A8_UNorm, AlphaMode.Premultiplied)));
+			Image?.Dispose();
+			Image = Bitmap.FromWicBitmap(target, FormatConverter, new BitmapProperties(new PixelFormat(DXGI.Format.R8G8B8A8_UNorm, AlphaMode.Premultiplied)));
 		}
 
 		public void Dispose()
 		{
 			FormatConverter?.Dispose();
-			_bitmap?.Dispose();
+			Image?.Dispose();
 		}
 	}
 }
