@@ -141,12 +141,12 @@ namespace Ingen.Game.Scenes
 				CurrentState = RenderState.LoadScreen;
 				Overlay.IsShown = true;
 				this.RegistTaskCompleteCondition(Task.Run(() =>
-					{
-						CurrentScene?.Dispose();
-						CurrentScene = null;
-						NextScene = (Scene)Container.Resolve(NextSceneType);
-						NextScene.UpdateRenderTarget(RenderTarget);
-					}));
+				{
+					CurrentScene?.Dispose();
+					CurrentScene = null;
+					NextScene = (Scene)Container.Resolve(NextSceneType);
+					NextScene.UpdateRenderTarget(RenderTarget);
+				}));
 				await SkipTick();
 				Overlay.IsShown = false;
 
