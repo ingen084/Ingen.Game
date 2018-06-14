@@ -1,6 +1,7 @@
 ﻿using Ingen.Game.Framework.Resources;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,7 +25,16 @@ namespace Ingen.Game.Framework
 		public ref DW.Factory DWFactory => ref _dWFactory;
 		#endregion
 
-		public Scene CurrentScene { get; set; }
+		private Scene _currentScene;
+		public Scene CurrentScene
+		{
+			get => _currentScene;
+			set
+			{
+				Debug.WriteLine($"CurrentSceneUpdated: {_currentScene?.GetType().Name}");
+				_currentScene = value;
+			}
+		}
 
 		public bool IsLinkFrameAndLogic { get; }
 
@@ -135,8 +145,8 @@ namespace Ingen.Game.Framework
 
 				if (IsLinkFrameAndLogic)
 				{
-					CurrentScene.Update();
-					Overlays.ForEach(o => o.Update());
+					CurrentScene.DoUpdate();
+					Overlays.ForEach(o => o.DoUpdate());
 				}
 				if (GameWindow.WindowState == System.Windows.Forms.FormWindowState.Minimized)
 					continue;
@@ -157,8 +167,8 @@ namespace Ingen.Game.Framework
 					Thread.Sleep((int)wait);
 				beforeLogicTime = Stopwatch.Elapsed;
 
-				CurrentScene.Update();
-				Overlays.ForEach(o => o.Update());
+				CurrentScene.DoUpdate();
+				Overlays.ForEach(o => o.DoUpdate());
 			}
 		}
 

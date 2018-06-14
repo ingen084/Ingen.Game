@@ -2,15 +2,16 @@
 using SharpDX;
 using SharpDX.Direct2D1;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Ingen.Game.Scenes
 {
 	public class FadeTransitionScene : TransitionScene
 	{
-		TimeSpan FadeTime;
-		GameContainer Container;
-		LoadingOverlay Overlay;
+		TimeSpan FadeTime { get; }
+		GameContainer Container { get; }
+		LoadingOverlay Overlay { get; }
 		public FadeTransitionScene(LoadingOverlay overlay, GameContainer container, TimeSpan fadeTime)
 		{
 			Container = container;
@@ -23,77 +24,73 @@ namespace Ingen.Game.Scenes
 			};
 		}
 
-		private enum State
+		enum RenderState
 		{
 			/// <summary>
-			/// 初期化直後
+			/// 移行前のシーン描画
 			/// </summary>
-			Neutral,
+			PreviousScene,
 			/// <summary>
 			/// ロード画面への推移エフェクト発生中
 			/// </summary>
-			FadingToLoadScreen,
+			FadeToLoadScreen,
 			/// <summary>
 			/// ロード画面からの推移エフェクト発生中
 			/// </summary>
-			FadingFromLoadScreen,
+			FadeFromLoadScreen,
 			/// <summary>
 			/// ロード画面なしで新画面へ推移エフェクト発生中
 			/// </summary>
-			FadingFromOldSceneToNewScene,
-			/// <summary>
-			/// 前の画面でタスク待機
-			/// </summary>
-			WaitingOnOldScene,
+			FadeFromPreviousSceneToNextScene,
 			/// <summary>
 			/// 読み込み画面の状態でタスク待機
 			/// </summary>
-			WaitingOnLoadScreen,
+			LoadScreen,
 		}
-		private State CurrentState;
+		RenderState CurrentState { get; set; }
 
-		bool isNeedLoadingScreen;
+		bool IsNeedLoadingScreen { get; set; }
 
-		Scene CurrentScene;
+		Scene CurrentScene { get; set; }
 
-		Type NewSceneType;
-		Scene NewScene;
+		Type NextSceneType { get; set; }
+		Scene NextScene { get; set; }
+
+		Animation FadingAnimation { get; set; }
 
 		public override void Initalize<TScene>(Scene currentScene)
 		{
 			CurrentScene = currentScene;
-			NewSceneType = typeof(TScene);
-			NewScene = null;
+			NextSceneType = typeof(TScene);
+			NextScene = null;
 
-			if(currentScene== null)
+			if (currentScene == null)
 			{
-				CurrentState = State.FadingToLoadScreen;
-				isNeedLoadingScreen = true;
+				CurrentState = RenderState.FadeToLoadScreen;
+				IsNeedLoadingScreen = true;
 				return;
 			}
 
-			CurrentState = State.Neutral;
+			CurrentState = RenderState.PreviousScene;
 
 			var DisposeTiming = currentScene.GetType().GetNavigateOptionsAttribute()?.DestroyTiming ?? Timing.Before;
 			var InitalizeTiming = typeof(TScene).GetNavigateOptionsAttribute()?.InitalizeTiming ?? Timing.After;
 
-			isNeedLoadingScreen = (DisposeTiming == Timing.Before || InitalizeTiming == Timing.After);
+			IsNeedLoadingScreen = (DisposeTiming == Timing.Before || InitalizeTiming == Timing.After);
 		}
 
-		Task SceneWorkTask;
 		LayerParameters parameter;
 		public override void Render()
 		{
 			switch (CurrentState)
 			{
-				case State.Neutral:
-				case State.WaitingOnOldScene:
+				case RenderState.PreviousScene:
 					CurrentScene.Render();
 					break;
-				case State.WaitingOnLoadScreen:
+				case RenderState.LoadScreen:
 					RenderLoadingScreen();
 					break;
-				case State.FadingToLoadScreen:
+				case RenderState.FadeToLoadScreen:
 					CurrentScene?.Render();
 					using (var layer = new Layer(RenderTarget))
 					{
@@ -103,23 +100,23 @@ namespace Ingen.Game.Scenes
 						RenderTarget.PopLayer();
 					}
 					break;
-				case State.FadingFromLoadScreen:
+				case RenderState.FadeFromLoadScreen:
 					RenderLoadingScreen();
 					using (var layer = new Layer(RenderTarget))
 					{
 						parameter.Opacity = FadingAnimation.Value;
 						RenderTarget.PushLayer(ref parameter, layer);
-						NewScene.Render();
+						NextScene.Render();
 						RenderTarget.PopLayer();
 					}
 					break;
-				case State.FadingFromOldSceneToNewScene:
+				case RenderState.FadeFromPreviousSceneToNextScene:
 					CurrentScene.Render();
 					using (var layer = new Layer(RenderTarget))
 					{
 						parameter.Opacity = FadingAnimation.Value;
 						RenderTarget.PushLayer(ref parameter, layer);
-						NewScene.Render();
+						NextScene.Render();
 						RenderTarget.PopLayer();
 					}
 					break;
@@ -130,80 +127,61 @@ namespace Ingen.Game.Scenes
 			RenderTarget.Clear(Color.Black);
 		}
 
-		public override void Update()
+		protected override async void Update()
 		{
-			switch (CurrentState)
+			//読み込み画面が必要な場合
+			if (IsNeedLoadingScreen)
 			{
-				//初回
-				case State.Neutral:
-					//読み込み画面が必要であれば移行開始
-					if (isNeedLoadingScreen)
-					{
-						FadingAnimation.Start(FadeTime);
-						CurrentState = State.FadingToLoadScreen;
-					}
-					//必要なければインスタンス生成
-					else
-					{
-						Overlay.IsShown = true;
-						SceneWorkTask = Task.Run(() => {
-							NewScene = (Scene)Container.Resolve(NewSceneType);
-							NewScene.UpdateRenderTarget(RenderTarget);
-						});
-						CurrentState = State.WaitingOnOldScene;
-					}
-					break;
-				case State.FadingToLoadScreen:
-					//読み込み画面へのアニメーションが終了したら破棄して読み込み
-					if (FadingAnimation.IsStarted)
-						break;
-					Overlay.IsShown = true;
-					SceneWorkTask = Task.Run(() =>
+				//読み込み画面へ移行
+				CurrentState = RenderState.FadeToLoadScreen;
+				this.StartAnimationAndRegistCompleteCondition(FadingAnimation, FadeTime);
+				await SkipTick();
+
+				//読み込み待機
+				CurrentState = RenderState.LoadScreen;
+				Overlay.IsShown = true;
+				this.RegistTaskCompleteCondition(Task.Run(() =>
 					{
 						CurrentScene?.Dispose();
 						CurrentScene = null;
-						NewScene = (Scene)Container.Resolve(NewSceneType);
-						NewScene.UpdateRenderTarget(RenderTarget);
-					});
-					CurrentState = State.WaitingOnLoadScreen;
-					break;
-				case State.WaitingOnLoadScreen:
-					//(読み込み画面が必要なときに)読み込みが完了したので移行開始
-					if (SceneWorkTask.Status != TaskStatus.RanToCompletion)
-						break;
-					Overlay.IsShown = false;
-					FadingAnimation.Start(FadeTime);
-					CurrentState = State.FadingFromLoadScreen;
-					break;
-				case State.FadingFromLoadScreen:
-					//移行完了したら役目は終了!
-					if (FadingAnimation.IsStarted)
-						break;
-					Container.CurrentScene = NewScene;
-					break;
+						NextScene = (Scene)Container.Resolve(NextSceneType);
+						NextScene.UpdateRenderTarget(RenderTarget);
+					}));
+				await SkipTick();
+				Overlay.IsShown = false;
 
-				case State.WaitingOnOldScene:
-					//(読み込み画面が必要ないときに)読み込みが完了したので移行開始
-					if (SceneWorkTask.Status != TaskStatus.RanToCompletion)
-						break;
-					Overlay.IsShown = false;
-					FadingAnimation.Start(FadeTime);
-					CurrentState = State.FadingFromOldSceneToNewScene;
-					break;
-				case State.FadingFromOldSceneToNewScene:
-					//移行完了したら役目は終了!
-					if (FadingAnimation.IsStarted)
-						break;
-					Task.Run(() =>
-					{
-						CurrentScene.Dispose();
-						CurrentScene = null;
-					});
-					Container.CurrentScene = NewScene;
-					break;
+				//新しい画面へ移行
+				CurrentState = RenderState.FadeFromLoadScreen;
+				this.StartAnimationAndRegistCompleteCondition(FadingAnimation, FadeTime);
+				await SkipTick();
+
+				//移行完了で役目は終了
+				Container.CurrentScene = NextScene;
+				return;
 			}
-		}
 
-		Animation FadingAnimation;
+			//ロード画面を必要としないのであればインスタンスを生成する
+			Overlay.IsShown = true;
+			this.RegistTaskCompleteCondition(Task.Run(() =>
+			{
+				NextScene = (Scene)Container.Resolve(NextSceneType);
+				NextScene.UpdateRenderTarget(RenderTarget);
+			}));
+			await SkipTick();
+
+			//(読み込み画面が必要ないときに)読み込みが完了したので移行開始
+			CurrentState = RenderState.FadeFromPreviousSceneToNextScene;
+			Overlay.IsShown = false;
+			this.StartAnimationAndRegistCompleteCondition(FadingAnimation, FadeTime);
+			await SkipTick();
+
+			//移行完了したら役目は終了 昔のシーンは破棄する
+			ThreadPool.QueueUserWorkItem(s =>
+			{
+				CurrentScene.Dispose();
+				CurrentScene = null;
+			});
+			Container.CurrentScene = NextScene;
+		}
 	}
 }

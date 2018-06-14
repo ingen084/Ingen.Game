@@ -36,7 +36,6 @@ namespace Ingen.Game
 				Container = container;
 				TransitionScene = tscene;
 
-				lastTime = DateTime.Now;
 				position = 10;
 				Resource.AddSolidColorBrushResource("MainBrush", new RawColor4(1, 1, 1, 1));
 				Resource.AddPngImageResource("Image", Container.ImagingFactory, @"D:\ingen\Desktop\saikoro_145.png");
@@ -53,28 +52,16 @@ namespace Ingen.Game
 				RenderTarget.Transform = Matrix3x2.Identity;
 			}
 
-			DateTime lastTime;
-			bool direction = false;
 			float position;
-			public override void Update()
+			protected override async void Update()
 			{
-				if (direction)
-					position -= 1.2f;
-				else
-					position += 2.4f;
-				if (position > 200)
-				{
-					position = 200;
-					direction = true;
-				}
-				if (position < 10)
-				{
-					position = 10;
-					direction = false;
-					Container.Navigate<SampleScene2>(TransitionScene);
-				}
+				for (; position < 500; position += 2.4f)
+					await SkipTick();
 
-				lastTime = DateTime.Now;
+				for (; position > 10; position -= 1.2f)
+					await SkipTick();
+
+				Container.Navigate<SampleScene2>(TransitionScene);
 			}
 
 			public override void Dispose()
@@ -114,7 +101,7 @@ namespace Ingen.Game
 			DateTime lastTime;
 			bool direction = false;
 			float position;
-			public override void Update()
+			protected override void Update()
 			{
 				if (direction)
 					position -= 1.2f;
