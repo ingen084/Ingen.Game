@@ -134,13 +134,12 @@ namespace Ingen.Game.Scenes
 			{
 				//読み込み画面へ移行
 				CurrentState = RenderState.FadeToLoadScreen;
-				this.StartAnimationAndRegistCompleteCondition(FadingAnimation, FadeTime);
-				await SkipTick();
+				await SkipTick(FadingAnimation, FadeTime);
 
 				//読み込み待機
 				CurrentState = RenderState.LoadScreen;
 				Overlay.IsShown = true;
-				this.RegistTaskCompleteCondition(Task.Run(() =>
+				await SkipTick(Task.Run(() =>
 				{
 					CurrentScene?.Dispose();
 					CurrentScene = null;
@@ -152,8 +151,7 @@ namespace Ingen.Game.Scenes
 
 				//新しい画面へ移行
 				CurrentState = RenderState.FadeFromLoadScreen;
-				this.StartAnimationAndRegistCompleteCondition(FadingAnimation, FadeTime);
-				await SkipTick();
+				await SkipTick(FadingAnimation, FadeTime);
 
 				//移行完了で役目は終了
 				Container.CurrentScene = NextScene;
@@ -162,18 +160,16 @@ namespace Ingen.Game.Scenes
 
 			//ロード画面を必要としないのであればインスタンスを生成する
 			Overlay.IsShown = true;
-			this.RegistTaskCompleteCondition(Task.Run(() =>
+			await SkipTick(Task.Run(() =>
 			{
 				NextScene = (Scene)Container.Resolve(NextSceneType);
 				NextScene.UpdateRenderTarget(RenderTarget);
 			}));
-			await SkipTick();
 
 			//(読み込み画面が必要ないときに)読み込みが完了したので移行開始
 			CurrentState = RenderState.FadeFromPreviousSceneToNextScene;
 			Overlay.IsShown = false;
-			this.StartAnimationAndRegistCompleteCondition(FadingAnimation, FadeTime);
-			await SkipTick();
+			await SkipTick(FadingAnimation, FadeTime);
 
 			//移行完了したら役目は終了 昔のシーンは破棄する
 			ThreadPool.QueueUserWorkItem(s =>

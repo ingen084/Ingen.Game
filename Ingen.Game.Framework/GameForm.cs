@@ -34,7 +34,6 @@ namespace Ingen.Game.Framework
 
 		public void Initalize()
 		{
-			ClientSize = new System.Drawing.Size(1280, 720);
 			StartPosition = FormStartPosition.CenterScreen;
 			MaximizeBox = false;
 			FormBorderStyle = FormBorderStyle.FixedSingle;

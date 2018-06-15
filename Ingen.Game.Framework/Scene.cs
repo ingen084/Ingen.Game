@@ -74,6 +74,24 @@ namespace Ingen.Game.Framework
 			IsCompleted = false;
 			return this;
 		}
+		public Scene SkipTick(Task task)
+		{
+			if (task.Status == TaskStatus.Created)
+				task.Start();
+			ResumeConditionChecker = () => task.IsCompleted || task.IsFaulted;
+			return SkipTick();
+		}
+		public Scene SkipTick(Animation animation)
+		{
+			ResumeConditionChecker = () => !animation.IsStarted;
+			return SkipTick();
+		}
+		public Scene SkipTick(Animation animation, TimeSpan dulation)
+		{
+			animation.Start(dulation);
+			ResumeConditionChecker = () => !animation.IsStarted;
+			return SkipTick();
+		}
 		#endregion
 
 	}

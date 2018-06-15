@@ -13,7 +13,7 @@ namespace Ingen.Game
 	{
 		public static void Main()
 		{
-			using (var container = new GameContainer(true, "Game Sample", 1280, 720) { TpsRate = 30 })
+			using (var container = new GameContainer(false, "Game Sample", 640, 480) { TpsRate = 30 })
 			{
 				var lo = container.Resolve<LoadingOverlay>();
 				container.AddOverlay(lo);
@@ -86,7 +86,7 @@ namespace Ingen.Game
 				Resource.AddSolidColorBrushResource("MainBrush", new RawColor4(1, 1, 1, 1));
 				Resource.AddPngImageResource("Image", Container.ImagingFactory, @"D:\ingen\Desktop\saikoro_145.png");
 
-				//System.Threading.Thread.Sleep(3000);
+				System.Threading.Thread.Sleep(1000);
 			}
 
 			public override void Render()

@@ -11,13 +11,14 @@ namespace Ingen.Game.Framework.Resources.Brushes
 		protected abstract void CreateBrush(RenderTarget target);
 		public void UpdateRenderTarget(RenderTarget target)
 		{
-			_brush?.Dispose();
+			Dispose();
 			CreateBrush(target);
 		}
 
 		public void Dispose()
 		{
 			_brush?.Dispose();
+			_brush = null;
 		}
 	}
 }

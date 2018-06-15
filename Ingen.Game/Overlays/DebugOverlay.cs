@@ -2,7 +2,6 @@
 using Ingen.Game.Framework.Resources.Brushes;
 using SharpDX.DirectWrite;
 using SharpDX.Mathematics.Interop;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -43,7 +42,7 @@ namespace Ingen.Game
 					$"FPS    : {(1000.0 / FrameTimeQueue.Average()).ToString("0.0")}\n" +
 					$"TPS    : {(1000.0 / UpdateTimeQueue.Average()).ToString("0.0")}\n" +
 					$"Scene  : {Container.CurrentScene.GetType().Name}", format, float.PositiveInfinity, float.PositiveInfinity))
-					RenderTarget.DrawTextLayout(new RawVector2(0, 720 - layout.Metrics.Height), layout, Resource.Get<BrushResource>("ForegroundBrush").Brush);
+					RenderTarget.DrawTextLayout(new RawVector2(0, Container.WindowHeight - layout.Metrics.Height), layout, Resource.Get<BrushResource>("ForegroundBrush").Brush);
 		}
 
 		double beforeUpdateTime = 0;
@@ -62,6 +61,7 @@ namespace Ingen.Game
 		public override void Dispose()
 		{
 			format?.Dispose();
+			format = null;
 			base.Dispose();
 		}
 	}

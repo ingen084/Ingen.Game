@@ -13,13 +13,16 @@ namespace Ingen.Game.Framework.Resources.Images
 		public void UpdateRenderTarget(RenderTarget target)
 		{
 			Image?.Dispose();
+			Image = null;
 			Image = Bitmap.FromWicBitmap(target, FormatConverter, new BitmapProperties(new PixelFormat(DXGI.Format.R8G8B8A8_UNorm, AlphaMode.Premultiplied)));
 		}
 
 		public void Dispose()
 		{
 			FormatConverter?.Dispose();
+			FormatConverter = null;
 			Image?.Dispose();
+			Image = null;
 		}
 	}
 }

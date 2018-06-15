@@ -31,8 +31,8 @@ namespace Ingen.Game.Framework
 			get => _currentScene;
 			set
 			{
-				Debug.WriteLine($"CurrentSceneUpdated: {_currentScene?.GetType().Name}");
 				_currentScene = value;
+				Debug.WriteLine($"CurrentSceneUpdated: {_currentScene?.GetType().Name}");
 			}
 		}
 
