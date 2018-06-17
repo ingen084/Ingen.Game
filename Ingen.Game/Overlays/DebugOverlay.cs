@@ -52,7 +52,7 @@ namespace Ingen.Game
 			{
 				var current = Container.Elapsed.TotalMilliseconds;
 				UpdateTimeQueue.Enqueue(current - beforeUpdateTime);
-				if (UpdateTimeQueue.Count > 120)
+				if (UpdateTimeQueue.Count > 100)
 					UpdateTimeQueue.Dequeue();
 				beforeUpdateTime = current;
 			}

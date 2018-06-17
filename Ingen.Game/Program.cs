@@ -13,7 +13,7 @@ namespace Ingen.Game
 	{
 		public static void Main()
 		{
-			using (var container = new GameContainer(false, "Game Sample", 640, 480) { TpsRate = 30 })
+			using (var container = new GameContainer(true, "Game Sample", 640, 480) { TpsRate = 30, CanResize = true })
 			{
 				var lo = container.Resolve<LoadingOverlay>();
 				container.AddOverlay(lo);
@@ -55,7 +55,7 @@ namespace Ingen.Game
 			float position;
 			protected override async void Update()
 			{
-				for (; position < 500; position += 2.4f)
+				for (; position < 300; position += 2.4f)
 					await SkipTick();
 
 				for (; position > 10; position -= 1.2f)
@@ -107,9 +107,9 @@ namespace Ingen.Game
 					position -= 1.2f;
 				else
 					position += 3.4f;
-				if (position > 500)
+				if (position > 300)
 				{
-					position = 500;
+					position = 300;
 					direction = true;
 				}
 				if (position < 10)

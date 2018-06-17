@@ -78,6 +78,13 @@ namespace Ingen.Game.Scenes
 
 			IsNeedLoadingScreen = (DisposeTiming == Timing.Before || InitalizeTiming == Timing.After);
 		}
+		public override void UpdateRenderTarget(RenderTarget target)
+		{
+			base.UpdateRenderTarget(target);
+			CurrentScene?.UpdateRenderTarget(target);
+			NextScene?.UpdateRenderTarget(target);
+		}
+
 
 		LayerParameters parameter;
 		public override void Render()

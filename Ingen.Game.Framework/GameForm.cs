@@ -1,5 +1,7 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
+using System;
+using System.Threading;
 using System.Windows.Forms;
 using D2D1 = SharpDX.Direct2D1;
 using D3D11 = SharpDX.Direct3D11;
@@ -30,22 +32,50 @@ namespace Ingen.Game.Framework
 
 		public GameForm()
 		{
+			MaximizeBox = false;
+			StartPosition = FormStartPosition.CenterScreen;
+			FormBorderStyle = CanResize ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
+			BackColor = System.Drawing.Color.Black;
+		}
+
+		private bool _canResize = false;
+		public bool CanResize
+		{
+			get => _canResize;
+			set
+			{
+				_canResize = value;
+				if (InvokeRequired)
+					Invoke(new Action(() => FormBorderStyle = CanResize ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle));
+				else
+					FormBorderStyle = CanResize ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
+			}
 		}
 
 		public void Initalize()
 		{
-			StartPosition = FormStartPosition.CenterScreen;
-			MaximizeBox = false;
-			FormBorderStyle = FormBorderStyle.FixedSingle;
+			System.Drawing.Size size;
+			IntPtr hWnd;
+			if (InvokeRequired)
+			{
+				size = (System.Drawing.Size)Invoke(new Func<System.Drawing.Size>(() => ClientSize));
+				hWnd = (IntPtr)Invoke(new Func<IntPtr>(() => Handle));
+			}
+			else
+			{
+				size = ClientSize;
+				hWnd = Handle;
+			}
 
+			RenderPauseMre.Reset();
 			#region Direct3D Initalize
 			// SwapChain description
 			var desc = new DXGI.SwapChainDescription()
 			{
 				BufferCount = 1,
-				ModeDescription = new DXGI.ModeDescription(ClientSize.Width, ClientSize.Height, new DXGI.Rational(60, 1), DXGI.Format.R8G8B8A8_UNorm),
+				ModeDescription = new DXGI.ModeDescription(size.Width, size.Height, new DXGI.Rational(60, 1), DXGI.Format.R8G8B8A8_UNorm),
 				IsWindowed = true,
-				OutputHandle = Handle,
+				OutputHandle = hWnd,
 				SampleDescription = new DXGI.SampleDescription(1, 0),
 				SwapEffect = DXGI.SwapEffect.Discard,
 				Usage = DXGI.Usage.RenderTargetOutput
@@ -56,7 +86,7 @@ namespace Ingen.Game.Framework
 
 			// Ignore all windows events
 			using (DXGI.Factory factory = SwapChain.GetParent<DXGI.Factory>())
-				factory.MakeWindowAssociation(Handle, DXGI.WindowAssociationFlags.IgnoreAll);
+				factory.MakeWindowAssociation(hWnd, DXGI.WindowAssociationFlags.IgnoreAll);
 
 			// New RenderTargetView from the backbuffer
 			BackBuffer = D3D11.Resource.FromSwapChain<D3D11.Texture2D>(SwapChain, 0);
@@ -72,10 +102,35 @@ namespace Ingen.Game.Framework
 			}
 			RenderTarget.AntialiasMode = D2D1.AntialiasMode.PerPrimitive;
 			#endregion
+			RenderTargetUpdated?.Invoke();
 		}
 
+		public event Action RenderTargetUpdated;
+		public event Action<Size2> WindowSizeChanged;
+		private System.Drawing.Size? NewSize { get; set; }
+		protected override void OnSizeChanged(EventArgs e)
+		{
+			NewSize = ClientSize;
+			WindowSizeChanged?.Invoke(new Size2(ClientSize.Width, ClientSize.Height));
+			base.OnClientSizeChanged(e);
+		}
+
+
+		ManualResetEventSlim RenderPauseMre { get; set; } = new ManualResetEventSlim(true);
+		protected override void OnPaint(PaintEventArgs e)
+		{
+			RenderPauseMre.Wait();
+			base.OnPaint(e);
+		}
 		public void BeginDraw()
 		{
+			if (NewSize is System.Drawing.Size newSize)
+			{
+				D3dDispose();
+				Initalize();
+				NewSize = null;
+			}
+			RenderPauseMre.Set();
 			D3D11Device.ImmediateContext.Rasterizer.SetViewport(0, 0, ClientSize.Width, ClientSize.Height);
 			D3D11Device.ImmediateContext.OutputMerger.SetTargets(_backBufferView);
 
@@ -87,17 +142,27 @@ namespace Ingen.Game.Framework
 			SwapChain.Present(1, DXGI.PresentFlags.UseDuration);
 		}
 
-
-		protected override void Dispose(bool disposing)
+		private void D3dDispose()
 		{
 			D3D11Device?.Dispose();
+			D3D11Device = null;
 			SwapChain?.Dispose();
+			SwapChain = null;
 			BackBuffer?.Dispose();
+			BackBuffer = null;
 			BackBufferView?.Dispose();
+			BackBufferView = null;
 
 			D2D1Factory?.Dispose();
+			D2D1Factory = null;
 			RenderTarget?.Dispose();
+			RenderTarget = null;
 			D2D1DeviceContext?.Dispose();
+			D2D1DeviceContext = null;
+		}
+		protected override void Dispose(bool disposing)
+		{
+			D3dDispose();
 			base.Dispose(disposing);
 		}
 	}

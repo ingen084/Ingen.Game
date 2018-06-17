@@ -46,6 +46,12 @@ namespace Ingen.Game.Framework
 		public int WindowWidth { get; set; }
 		public int WindowHeight { get; set; }
 
+		public bool CanResize
+		{
+			get => GameWindow.CanResize;
+			set => GameWindow.CanResize = value;
+		}
+
 		private CancellationTokenSource TasksCancellationTokenSource;
 		private Task RenderTask;
 		private Task LogicTask;
@@ -85,6 +91,19 @@ namespace Ingen.Game.Framework
 			RenderTask = new Task(Render, TasksCancellationTokenSource.Token, TaskCreationOptions.LongRunning);
 			if (!IsLinkFrameAndLogic)
 				LogicTask = new Task(Logic, TasksCancellationTokenSource.Token, TaskCreationOptions.LongRunning);
+
+			GameWindow.RenderTargetUpdated += () =>
+			{
+				GlobalResource.UpdateRenderTarget(GameWindow.RenderTarget);
+				CurrentScene.UpdateRenderTarget(GameWindow.RenderTarget);
+
+				Overlays.ForEach(o => o.UpdateRenderTarget(GameWindow.RenderTarget));
+			};
+			GameWindow.WindowSizeChanged += size => 
+			{
+				WindowWidth = size.Width;
+				WindowHeight = size.Height;
+			};
 		}
 
 		public T Resolve<T>()
@@ -113,11 +132,6 @@ namespace Ingen.Game.Framework
 		{
 			CurrentScene = startupScene;
 			GameWindow.Initalize();
-
-			GlobalResource.UpdateRenderTarget(GameWindow.RenderTarget);
-			CurrentScene.UpdateRenderTarget(GameWindow.RenderTarget);
-
-			Overlays.ForEach(o => o.UpdateRenderTarget(GameWindow.RenderTarget));
 
 			Stopwatch.Start();
 			RenderTask.Start();
@@ -177,12 +191,14 @@ namespace Ingen.Game.Framework
 		{
 			if (isDisposed)
 				return;
+			Debug.WriteLine("GameContainer Dispose...");
 			isDisposed = true;
 			CurrentScene?.Dispose();
 			lock (Overlays)
 				Overlays.ForEach(o => o.Dispose());
 			GameWindow?.Dispose();
 			Container?.Dispose();
+			Debug.WriteLine("GameContainer Disposed");
 		}
 	}
 }
