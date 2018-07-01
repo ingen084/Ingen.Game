@@ -52,22 +52,16 @@ namespace Ingen.Game.Framework
 			}
 		}
 
-		public void Initalize()
+		public void Initalize(System.Drawing.Size? nSize = null, IntPtr? nhWnd = null)
 		{
-			System.Drawing.Size size;
-			IntPtr hWnd;
-			if (InvokeRequired)
-			{
-				size = (System.Drawing.Size)Invoke(new Func<System.Drawing.Size>(() => ClientSize));
-				hWnd = (IntPtr)Invoke(new Func<IntPtr>(() => Handle));
-			}
-			else
+			System.Drawing.Size size = nSize ?? System.Drawing.Size.Empty;
+			IntPtr hWnd = nhWnd ?? IntPtr.Zero;
+			if (size == System.Drawing.Size.Empty || hWnd == IntPtr.Zero)
 			{
 				size = ClientSize;
 				hWnd = Handle;
 			}
 
-			RenderPauseMre.Reset();
 			#region Direct3D Initalize
 			// SwapChain description
 			var desc = new DXGI.SwapChainDescription()
@@ -126,8 +120,11 @@ namespace Ingen.Game.Framework
 		{
 			if (NewSize is System.Drawing.Size newSize)
 			{
+				(System.Drawing.Size size, IntPtr hWnd) = ((System.Drawing.Size, IntPtr))Invoke(new Func<(System.Drawing.Size, IntPtr)>(() => (ClientSize, Handle)));
+
+				RenderPauseMre.Reset();
 				D3dDispose();
-				Initalize();
+				Initalize(size, hWnd);
 				NewSize = null;
 			}
 			RenderPauseMre.Set();
