@@ -169,7 +169,7 @@ namespace Ingen.Game.Scenes
 			await SkipTick(Task.Run(() =>
 			{
 				NextScene = (Scene)Container.Resolve(NextSceneType);
-				NextScene.UpdateRenderTarget(RenderTarget);
+				Container.GameWindow.SetActionAndWaitNextFrame(() => NextScene.UpdateRenderTarget(RenderTarget)); //todo FormsのDLLを使用しないといけないのはいささか不本意である。
 			}));
 
 			//(読み込み画面が必要ないときに)読み込みが完了したので移行開始

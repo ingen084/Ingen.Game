@@ -137,6 +137,7 @@ namespace Ingen.Game.Framework
 		}
 		public void BeginDraw()
 		{
+			NextRenderLogicTask?.Invoke();
 			if (NewSize is System.Drawing.Size newSize)
 			{
 				(System.Drawing.Size size, IntPtr hWnd) = ((System.Drawing.Size, IntPtr))Invoke(new Func<(System.Drawing.Size, IntPtr)>(() => (ClientSize, Handle)));
@@ -146,7 +147,6 @@ namespace Ingen.Game.Framework
 				Initalize(size, hWnd);
 				NewSize = null;
 			}
-			NextRenderLogicTask?.Invoke();
 			RenderPauseMre.Set();
 			D3D11Device.ImmediateContext.Rasterizer.SetViewport(0, 0, ClientSize.Width, ClientSize.Height);
 			D3D11Device.ImmediateContext.OutputMerger.SetTargets(_backBufferView);
