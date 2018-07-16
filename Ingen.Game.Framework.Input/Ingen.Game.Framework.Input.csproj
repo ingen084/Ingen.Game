@@ -8,4 +8,8 @@
     <PackageReference Include="SharpDX.DirectInput" Version="4.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Ingen.Game.Framework\Ingen.Game.Framework.csproj" />
+  </ItemGroup>
+
 </Project>

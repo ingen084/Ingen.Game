@@ -1,10 +1,8 @@
 ﻿using Ingen.Game.Framework.Resources;
 using SharpDX.Direct2D1;
 using System;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Unity.Attributes;
 
 namespace Ingen.Game.Framework
 {

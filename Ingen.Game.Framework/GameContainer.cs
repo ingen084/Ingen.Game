@@ -53,8 +53,8 @@ namespace Ingen.Game.Framework
 		}
 
 		private CancellationTokenSource TasksCancellationTokenSource;
-		private Task RenderTask;
-		private Task LogicTask;
+		private readonly Task RenderTask;
+		private readonly Task LogicTask;
 
 		public ushort TpsRate { get; set; } = 30;
 
@@ -70,6 +70,18 @@ namespace Ingen.Game.Framework
 					return;
 				}
 			Overlays.Add(overlay);
+		}
+
+		private List<IGameService> Services { get; } = new List<IGameService>();
+		public TService GetService<TService>() where TService : class, IGameService
+		{
+			var service = Container.Resolve<TService>();
+			if (!Container.IsRegistered<TService>())
+			{
+				Container.RegisterInstance(service, new ContainerControlledLifetimeManager());
+				Services.Add(service);
+			}
+			return service;
 		}
 
 		public GameContainer(bool isLinkFrameAndLogic, string windowTitle, int windowWidth, int windowHeight)
@@ -162,11 +174,13 @@ namespace Ingen.Game.Framework
 
 				if (IsLinkFrameAndLogic)
 				{
+					Services.ForEach(s => s.Update());
 					CurrentScene.DoUpdate();
 					Overlays.ForEach(o => o.DoUpdate());
 				}
 				if (GameWindow.WindowState == System.Windows.Forms.FormWindowState.Minimized)
 					continue;
+				Services.ForEach(s => s.Render());
 				GameWindow.BeginDraw();
 				CurrentScene.Render();
 				Overlays.ForEach(o => o.Render());
@@ -184,6 +198,7 @@ namespace Ingen.Game.Framework
 					Thread.Sleep((int)wait);
 				beforeLogicTime = Stopwatch.Elapsed;
 
+				Services.ForEach(s => s.Update());
 				CurrentScene.DoUpdate();
 				Overlays.ForEach(o => o.DoUpdate());
 			}

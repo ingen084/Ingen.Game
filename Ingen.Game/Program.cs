@@ -13,7 +13,12 @@ namespace Ingen.Game
 	{
 		public static void Main()
 		{
-			using (var container = new GameContainer(false, "Game Sample", 640, 480) { TpsRate = 30, CanResize = true })
+			using (var container = new GameContainer(false, "Game Sample", 640, 480)
+				{
+					TpsRate = 30,
+					CanResize = true
+				}
+				.UseInputService())
 			{
 				var lo = container.Resolve<LoadingOverlay>();
 				container.AddOverlay(lo);

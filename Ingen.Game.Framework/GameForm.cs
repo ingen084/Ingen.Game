@@ -32,7 +32,6 @@ namespace Ingen.Game.Framework
 
 		public GameForm()
 		{
-			MaximizeBox = false;
 			StartPosition = FormStartPosition.CenterScreen;
 			FormBorderStyle = CanResize ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
 			BackColor = System.Drawing.Color.Black;

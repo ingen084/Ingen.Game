@@ -47,6 +47,10 @@
     <Compile Include="Scenes\FadeTransitionScene.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Ingen.Game.Framework.Input\Ingen.Game.Framework.Input.csproj">
+      <Project>{5ea92375-9386-4eb1-9eb6-0abf4832e98e}</Project>
+      <Name>Ingen.Game.Framework.Input</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Ingen.Game.Framework\Ingen.Game.Framework.csproj">
       <Project>{AD0AC3E1-04F2-4570-9A89-6CA87F7F2B78}</Project>
       <Name>Ingen.Game.Framework</Name>
