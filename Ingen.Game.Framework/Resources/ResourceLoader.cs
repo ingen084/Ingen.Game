@@ -1,7 +1,6 @@
 ﻿using SharpDX.Direct2D1;
 using System;
 using System.Collections;
-using System.Threading;
 
 namespace Ingen.Game.Framework.Resources
 {
