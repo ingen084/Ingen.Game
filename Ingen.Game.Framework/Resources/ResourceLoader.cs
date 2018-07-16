@@ -7,26 +7,17 @@ namespace Ingen.Game.Framework.Resources
 {
 	public class ResourceLoader : IDisposable
 	{
-		ReaderWriterLockSlim HashtableLock { get; }
-		Hashtable Hashtable { get; }
+		Hashtable Hashtable { get; set; }
 
 		public ResourceLoader()
 		{
-			HashtableLock = new ReaderWriterLockSlim();
 			Hashtable = new Hashtable();
 		}
 
 		public void AddResource(string key, IResource resource)
 		{
-			HashtableLock.EnterWriteLock();
-			try
-			{
+			lock (Hashtable)
 				Hashtable.Add(key, resource);
-			}
-			finally
-			{
-				HashtableLock.ExitWriteLock();
-			}
 		}
 
 		public IResource this[object key]
@@ -38,24 +29,16 @@ namespace Ingen.Game.Framework.Resources
 
 		public void UpdateRenderTarget(RenderTarget target)
 		{
-			HashtableLock.EnterWriteLock();
-			try
-			{
-				foreach (var resource in Hashtable.Values)
-					(resource as IResource)?.UpdateRenderTarget(target);
-			}
-			finally
-			{
-				HashtableLock.ExitWriteLock();
-			}
+			foreach (var resource in Hashtable.Values)
+				(resource as IResource).UpdateRenderTarget(target);
 		}
 
 		public void Dispose()
 		{
-			foreach (var resource in Hashtable)
-				(resource as IDisposable)?.Dispose();
-			lock (Hashtable)
-				Hashtable.Clear();
+			foreach (var resource in Hashtable.Values)
+				(resource as IResource).Dispose();
+			Hashtable.Clear();
+			Hashtable = null;
 		}
 	}
 }

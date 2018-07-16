@@ -1,5 +1,4 @@
 ﻿using WIC = SharpDX.WIC;
-using SharpDX.Direct2D1;
 using SharpDX.IO;
 
 namespace Ingen.Game.Framework.Resources.Images

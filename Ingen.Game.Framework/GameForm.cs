@@ -110,7 +110,27 @@ namespace Ingen.Game.Framework
 		}
 
 
-		ManualResetEventSlim RenderPauseMre { get; set; } = new ManualResetEventSlim(true);
+		private ManualResetEventSlim RenderPauseMre { get; set; } = new ManualResetEventSlim(true);
+		private ManualResetEventSlim NextRenderLogicTaskMre { get; set; } = new ManualResetEventSlim(true);
+		private Action NextRenderLogicTask;
+
+		//memo これ、ロジックスレッドを止めちゃうことになるけどいいのだろうか？
+		/// <summary>
+		/// 指定したデリゲートを描画スレッドで実行させる
+		/// </summary>
+		/// <param name="action"></param>
+		public void SetActionAndWaitNextFrame(Action action)
+		{
+			NextRenderLogicTaskMre.Set();
+			NextRenderLogicTask = new Action(() =>
+			{
+				action();
+				NextRenderLogicTask = null;
+				NextRenderLogicTaskMre.Reset();
+			});
+			NextRenderLogicTaskMre.Wait();
+		}
+
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			RenderPauseMre.Wait();
@@ -127,6 +147,7 @@ namespace Ingen.Game.Framework
 				Initalize(size, hWnd);
 				NewSize = null;
 			}
+			NextRenderLogicTask?.Invoke();
 			RenderPauseMre.Set();
 			D3D11Device.ImmediateContext.Rasterizer.SetViewport(0, 0, ClientSize.Width, ClientSize.Height);
 			D3D11Device.ImmediateContext.OutputMerger.SetTargets(_backBufferView);

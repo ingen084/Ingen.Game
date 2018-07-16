@@ -99,7 +99,7 @@ namespace Ingen.Game.Framework
 
 				Overlays.ForEach(o => o.UpdateRenderTarget(GameWindow.RenderTarget));
 			};
-			GameWindow.WindowSizeChanged += size => 
+			GameWindow.WindowSizeChanged += size =>
 			{
 				WindowWidth = size.Width;
 				WindowHeight = size.Height;
@@ -123,9 +123,12 @@ namespace Ingen.Game.Framework
 			if (CurrentScene is TransitionScene)
 				throw new InvalidOperationException("TransitionSceneからNavigateすることはできません。");
 
-			loadingScene.UpdateRenderTarget(GameWindow.RenderTarget);
-			loadingScene.Initalize<TScene>(CurrentScene);
-			CurrentScene = loadingScene;
+			GameWindow.SetActionAndWaitNextFrame(new Action(() =>
+			{
+				loadingScene.UpdateRenderTarget(GameWindow.RenderTarget);
+				loadingScene.Initalize<TScene>(CurrentScene);
+				CurrentScene = loadingScene;
+			}));
 		}
 
 		public void Start(Scene startupScene)

@@ -153,7 +153,6 @@ namespace Ingen.Game.Scenes
 					NextScene = (Scene)Container.Resolve(NextSceneType);
 					NextScene.UpdateRenderTarget(RenderTarget);
 				}));
-				await SkipTick();
 				Overlay.IsShown = false;
 
 				//新しい画面へ移行
