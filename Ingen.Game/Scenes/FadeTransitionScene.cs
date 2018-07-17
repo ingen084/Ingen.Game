@@ -151,7 +151,7 @@ namespace Ingen.Game.Scenes
 					CurrentScene?.Dispose();
 					CurrentScene = null;
 					NextScene = (Scene)Container.Resolve(NextSceneType);
-					NextScene.UpdateRenderTarget(RenderTarget);
+					Container.GameWindow.SetActionAndWaitNextFrame(() => NextScene.UpdateRenderTarget(RenderTarget)); //todo FormsのDLLを使用しないといけないのはいささか不本意である。
 				}));
 				Overlay.IsShown = false;
 
