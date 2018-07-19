@@ -9,14 +9,9 @@ namespace Ingen.Game.Framework
 			container.GetService<KeyboardInputService>();
 			return container;
 		}
-		public static GameContainer UseMouseRawInputService(this GameContainer container)
+		public static GameContainer UseMouseInputService(this GameContainer container)
 		{
-			container.GetService<MouseRawInputService>();
-			return container;
-		}
-		public static GameContainer UseMouseWindowInputService(this GameContainer container)
-		{
-			container.GetService<MouseWindowInputService>();
+			container.GetService<MouseInputService>();
 			return container;
 		}
 	}

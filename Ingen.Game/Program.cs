@@ -17,7 +17,7 @@ namespace Ingen.Game
 					TpsRate = 30,
 					CanResize = true
 				}
-				.UseMouseWindowInputService())
+				.UseMouseInputService())
 			{
 				var lo = container.Resolve<LoadingOverlay>();
 				container.AddOverlay(lo);

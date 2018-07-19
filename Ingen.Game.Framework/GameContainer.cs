@@ -172,9 +172,11 @@ namespace Ingen.Game.Framework
 
 		public void Shutdown()
 		{
+			if (TasksCancellationTokenSource.IsCancellationRequested)
+				return;
+			TasksCancellationTokenSource.Cancel();
 			Task.Run(() =>
 			{
-				TasksCancellationTokenSource.Cancel();
 				LogicTask?.Wait();
 				RenderTask.Wait();
 				Stopwatch.Stop();

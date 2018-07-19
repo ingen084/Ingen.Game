@@ -13,18 +13,16 @@ namespace Ingen.Game
 {
 	public class MouseCursorTestOverlay : Overlay
 	{
-		MouseRawInputService MouseRawInputService { get; }
-		MouseWindowInputService MouseWindowInputService { get; }
+		MouseInputService MouseInputService { get; }
 		GameContainer Container { get; }
 
 		RawVector2 CurrentPos = new RawVector2();
 
 		TextFormat format;
-		public MouseCursorTestOverlay(MouseRawInputService rawInputService, MouseWindowInputService windowInputService,GameContainer container)
+		public MouseCursorTestOverlay(MouseInputService windowInputService, GameContainer container)
 		{
 			Container = container;
-			MouseRawInputService = rawInputService;
-			MouseWindowInputService = windowInputService;
+			MouseInputService = windowInputService;
 
 			Resource.AddResource("ForegroundBrush", new SolidColorBrushResource(new RawColor4(1, 1, 1, .9f)));
 			format = new TextFormat(Container.DWFactory, "MS Gothic", FontWeight.Bold, FontStyle.Normal, 32);
@@ -42,23 +40,20 @@ namespace Ingen.Game
 
 		protected override void Update()
 		{
-			if (MouseRawInputService.LastMouseState != null)
-			{
-				CurrentPos.X += MouseRawInputService.LastMouseState.X;
-				CurrentPos.Y += MouseRawInputService.LastMouseState.Y;
+			//CurrentPos.X += MouseInputService.LastMouseState.X;
+			//CurrentPos.Y += MouseInputService.LastMouseState.Y;
 
-				if (Container.WindowWidth < CurrentPos.X)
-					CurrentPos.X = Container.WindowWidth;
-				if (CurrentPos.X < 0)
-					CurrentPos.X = 0;
+			//if (Container.WindowWidth < CurrentPos.X)
+			//	CurrentPos.X = Container.WindowWidth;
+			//if (CurrentPos.X < 0)
+			//	CurrentPos.X = 0;
 
-				if (Container.WindowHeight < CurrentPos.Y)
-					CurrentPos.Y = Container.WindowHeight;
-				if (CurrentPos.Y < 0)
-					CurrentPos.Y = 0;
-				return;
-			}
-			CurrentPos = MouseWindowInputService.LastMousePosition;
+			//if (Container.WindowHeight < CurrentPos.Y)
+			//	CurrentPos.Y = Container.WindowHeight;
+			//if (CurrentPos.Y < 0)
+			//	CurrentPos.Y = 0;
+
+			CurrentPos = MouseInputService.LastPosition;
 			//memo 終了テスト
 			if (CurrentPos.X < -100 && CurrentPos.Y < -100)
 				Container.Shutdown();
