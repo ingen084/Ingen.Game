@@ -7,23 +7,18 @@ namespace Ingen.Game.Framework.Resources.Sprite
 	public class SpriteAtlasResource : IResource
 	{
 		ImageResource ImageResource { get; set; }
-		internal DeviceContext DeviceContext { get; set; }
-		GameContainer Container { get; }
 
-		public SpriteAtlasResource(ImageResource baseImageResource, GameContainer container)
+		public SpriteAtlasResource(ImageResource baseImageResource)
 		{
-			Container = container;
 			ImageResource = baseImageResource;
-			DeviceContext = container.GameWindow.D2D1DeviceContext;
 		}
 
 		public SpriteResource GetSprite(RawRectangle rect)
 			=> new SpriteResource(this, rect);
 
-		public void UpdateRenderTarget(RenderTarget target)
+		public void UpdateDevice(DeviceContext context)
 		{
-			ImageResource.UpdateRenderTarget(target);
-			DeviceContext = Container.GameWindow.D2D1DeviceContext;
+			ImageResource.UpdateDevice(context);
 		}
 
 		public void Dispose()

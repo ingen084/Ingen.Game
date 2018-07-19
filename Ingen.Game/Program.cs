@@ -50,11 +50,11 @@ namespace Ingen.Game
 
 			public override void Render()
 			{
-				RenderTarget.Clear(Color.CornflowerBlue);
+				DeviceContext.Clear(Color.CornflowerBlue);
 
-				RenderTarget.Transform = Matrix3x2.Rotation(position * 0.018f, new Vector2(position + 50, position + 150));
-				RenderTarget.DrawBitmap(Resource, "Image", new RawRectangleF(position, position + 100, position + 100, position + 200));
-				RenderTarget.Transform = Matrix3x2.Identity;
+				DeviceContext.Transform = Matrix3x2.Rotation(position * 0.018f, new Vector2(position + 50, position + 150));
+				DeviceContext.DrawBitmap(Resource, "Image", new RawRectangleF(position, position + 100, position + 100, position + 200));
+				DeviceContext.Transform = Matrix3x2.Identity;
 			}
 
 			float position;
@@ -96,11 +96,11 @@ namespace Ingen.Game
 
 			public override void Render()
 			{
-				RenderTarget.Clear(Color.MediumPurple);
+				DeviceContext.Clear(Color.MediumPurple);
 
-				RenderTarget.Transform = Matrix3x2.Rotation(position * 0.018f, new Vector2(position + 100, 200));
-				RenderTarget.DrawBitmap(Resource, "Image", new RawRectangleF(position, 100, position + 200, 300));
-				RenderTarget.Transform = Matrix3x2.Identity;
+				DeviceContext.Transform = Matrix3x2.Rotation(position * 0.018f, new Vector2(position + 100, 200));
+				DeviceContext.DrawBitmap(Resource, "Image", new RawRectangleF(position, 100, position + 200, 300));
+				DeviceContext.Transform = Matrix3x2.Identity;
 			}
 
 			DateTime lastTime;

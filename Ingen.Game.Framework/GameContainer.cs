@@ -73,8 +73,8 @@ namespace Ingen.Game.Framework
 		private List<Overlay> Overlays { get; } = new List<Overlay>();
 		public void AddOverlay(Overlay overlay)
 		{
-			if (GameWindow?.RenderTarget != null)
-				overlay.UpdateRenderTarget(GameWindow.RenderTarget);
+			if (GameWindow?.DeviceContext != null)
+				overlay.UpdateDevice(GameWindow.DeviceContext);
 			for (var i = 0; i < Overlays.Count; i++)
 				if (overlay.Priority <= Overlays[i].Priority)
 				{
@@ -118,10 +118,10 @@ namespace Ingen.Game.Framework
 
 			GameWindow.RenderTargetUpdated += () =>
 			{
-				GlobalResource.UpdateRenderTarget(GameWindow.RenderTarget);
-				CurrentScene.UpdateRenderTarget(GameWindow.RenderTarget);
+				GlobalResource.UpdateDevice(GameWindow.DeviceContext);
+				CurrentScene.UpdateDevice(GameWindow.DeviceContext);
 
-				Overlays.ForEach(o => o.UpdateRenderTarget(GameWindow.RenderTarget));
+				Overlays.ForEach(o => o.UpdateDevice(GameWindow.DeviceContext));
 			};
 			GameWindow.WindowSizeChanged += size =>
 			{
@@ -149,7 +149,7 @@ namespace Ingen.Game.Framework
 
 			GameWindow.SetActionAndWaitNextFrame(new Action(() =>
 			{
-				loadingScene.UpdateRenderTarget(GameWindow.RenderTarget);
+				loadingScene.UpdateDevice(GameWindow.DeviceContext);
 				loadingScene.Initalize<TScene>(CurrentScene);
 				CurrentScene = loadingScene;
 			}));

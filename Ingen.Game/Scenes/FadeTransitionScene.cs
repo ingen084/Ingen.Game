@@ -78,11 +78,11 @@ namespace Ingen.Game.Scenes
 
 			IsNeedLoadingScreen = (DisposeTiming == Timing.Before || InitalizeTiming == Timing.After);
 		}
-		public override void UpdateRenderTarget(RenderTarget target)
+		public override void UpdateDevice(DeviceContext context)
 		{
-			base.UpdateRenderTarget(target);
-			CurrentScene?.UpdateRenderTarget(target);
-			NextScene?.UpdateRenderTarget(target);
+			base.UpdateDevice(context);
+			CurrentScene?.UpdateDevice(context);
+			NextScene?.UpdateDevice(context);
 		}
 
 
@@ -99,39 +99,39 @@ namespace Ingen.Game.Scenes
 					break;
 				case RenderState.FadeToLoadScreen:
 					CurrentScene?.Render();
-					using (var layer = new Layer(RenderTarget))
+					using (var layer = new Layer(DeviceContext))
 					{
 						parameter.Opacity = FadingAnimation.Value;
-						RenderTarget.PushLayer(ref parameter, layer);
+						DeviceContext.PushLayer(ref parameter, layer);
 						RenderLoadingScreen();
-						RenderTarget.PopLayer();
+						DeviceContext.PopLayer();
 					}
 					break;
 				case RenderState.FadeFromLoadScreen:
 					RenderLoadingScreen();
-					using (var layer = new Layer(RenderTarget))
+					using (var layer = new Layer(DeviceContext))
 					{
 						parameter.Opacity = FadingAnimation.Value;
-						RenderTarget.PushLayer(ref parameter, layer);
+						DeviceContext.PushLayer(ref parameter, layer);
 						NextScene.Render();
-						RenderTarget.PopLayer();
+						DeviceContext.PopLayer();
 					}
 					break;
 				case RenderState.FadeFromPreviousSceneToNextScene:
 					CurrentScene.Render();
-					using (var layer = new Layer(RenderTarget))
+					using (var layer = new Layer(DeviceContext))
 					{
 						parameter.Opacity = FadingAnimation.Value;
-						RenderTarget.PushLayer(ref parameter, layer);
+						DeviceContext.PushLayer(ref parameter, layer);
 						NextScene.Render();
-						RenderTarget.PopLayer();
+						DeviceContext.PopLayer();
 					}
 					break;
 			}
 		}
 		private void RenderLoadingScreen()
 		{
-			RenderTarget.Clear(Color.Black);
+			DeviceContext.Clear(Color.Black);
 		}
 
 		protected override async void Update()
@@ -151,7 +151,7 @@ namespace Ingen.Game.Scenes
 					CurrentScene?.Dispose();
 					CurrentScene = null;
 					NextScene = (Scene)Container.Resolve(NextSceneType);
-					Container.GameWindow.SetActionAndWaitNextFrame(() => NextScene.UpdateRenderTarget(RenderTarget)); //todo FormsのDLLを使用しないといけないのはいささか不本意である。
+					Container.GameWindow.SetActionAndWaitNextFrame(() => NextScene.UpdateDevice(DeviceContext)); //todo FormsのDLLを使用しないといけないのはいささか不本意である。
 				}));
 				Overlay.IsShown = false;
 
@@ -169,7 +169,7 @@ namespace Ingen.Game.Scenes
 			await SkipTick(Task.Run(() =>
 			{
 				NextScene = (Scene)Container.Resolve(NextSceneType);
-				Container.GameWindow.SetActionAndWaitNextFrame(() => NextScene.UpdateRenderTarget(RenderTarget)); //todo FormsのDLLを使用しないといけないのはいささか不本意である。
+				Container.GameWindow.SetActionAndWaitNextFrame(() => NextScene.UpdateDevice(DeviceContext)); //todo FormsのDLLを使用しないといけないのはいささか不本意である。
 			}));
 
 			//(読み込み画面が必要ないときに)読み込みが完了したので移行開始

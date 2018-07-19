@@ -30,23 +30,17 @@ namespace Ingen.Game.Framework.Resources.Sprite
 			Size = BaseImage.Image.PixelSize;
 			Rect = new RawRectangleF(rect.Left, rect.Top, rect.Right, rect.Bottom);
 			Size = new Size2(rect.Right - rect.Left, rect.Bottom - rect.Top);
-			UpdateEffect();
 		}
 
-		void UpdateEffect()
-		{
-			AtlasEffect = new Effect(ParentAtlas.DeviceContext, AtlasEffectGuid);
-			AtlasEffect.SetValue((int)AtlasProperties.InputRectangle, Rect);
-		}
-
-		public void UpdateRenderTarget(RenderTarget target)
+		public void UpdateDevice(DeviceContext context)
 		{
 			if (BaseImage == null)
 			{
-				UpdateEffect();
+				AtlasEffect = new Effect(context, AtlasEffectGuid);
+				AtlasEffect.SetValue((int)AtlasProperties.InputRectangle, Rect);
 				return;
 			}
-			BaseImage.UpdateRenderTarget(target);
+			BaseImage.UpdateDevice(context);
 		}
 
 		public void Dispose()
@@ -59,27 +53,6 @@ namespace Ingen.Game.Framework.Resources.Sprite
 			}
 			BaseImage.Dispose();
 			BaseImage = null;
-		}
-
-
-		public void Render(RenderTarget target, RawVector2 position)
-		{
-			ParentAtlas.DeviceContext.DrawImage(AtlasEffect);
-		}
-
-		public void Render(RenderTarget target, RawRectangleF rect)
-		{
-			throw new NotImplementedException();
-		}
-
-		public void Render(RenderTarget target, RawVector2 position, float rotateDeg, RawRectangleF rotateOrigin)
-		{
-			throw new NotImplementedException();
-		}
-
-		public void Render(RenderTarget target, RawRectangleF rect, float rotateDeg, RawRectangleF rotateOrigin)
-		{
-			throw new NotImplementedException();
 		}
 	}
 }

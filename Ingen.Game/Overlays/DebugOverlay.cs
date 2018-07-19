@@ -39,25 +39,27 @@ namespace Ingen.Game
 			if (FrameTimeQueue.Count > 120)
 				FrameTimeQueue.Dequeue();
 
-			var str =
-					$"Elapsed: {Container.Elapsed.ToString(@"dd\.hh\:mm\:ss\.fff")}\n" +
-					$"FPS    : {(1000.0 / FrameTimeQueue.Average()).ToString("0.0")}\n" +
-					$"TPS    : {(1000.0 / UpdateTimeQueue.Average()).ToString("0.0")}\n" +
-					$"Scene  : {Container.CurrentScene.GetType().Name}";
-
-			if (MouseInputService != null)
-			{
-				str =
-					$"MoveAmount:{{{MouseInputService.LastMouseState.X},{MouseInputService.LastMouseState.Y},{MouseInputService.LastMouseState.Z}}}\n" +
-					$"CurrentPos:{{{MouseInputService.LastPosition.X},{MouseInputService.LastPosition.Y}}}\n" +
-					$"Buttons   :{string.Join(",", MouseInputService.LastMouseState.Buttons.Select((b, i) => $"{i}:{(b ? "t" : "f")}"))}\n" +
-					$"\n" +
-					str;
-			}
-
 			lock (UpdateTimeQueue)
+			{
+				var str =
+						$"Elapsed: {Container.Elapsed.ToString(@"dd\.hh\:mm\:ss\.fff")}\n" +
+						$"FPS    : {(1000.0 / FrameTimeQueue.Average()).ToString("0.0")}\n" +
+						$"TPS    : {(1000.0 / UpdateTimeQueue.Average()).ToString("0.0")}\n" +
+						$"Scene  : {Container.CurrentScene.GetType().Name}";
+
+				if (MouseInputService != null)
+				{
+					str =
+						$"MoveAmount:{{{MouseInputService.LastMouseState.X},{MouseInputService.LastMouseState.Y},{MouseInputService.LastMouseState.Z}}}\n" +
+						$"CurrentPos:{{{MouseInputService.LastPosition.X},{MouseInputService.LastPosition.Y}}}\n" +
+						$"Buttons   :{string.Join(",", MouseInputService.LastMouseState.Buttons.Select((b, i) => $"{i}:{(b ? "t" : "f")}"))}\n" +
+						$"\n" +
+						str;
+				}
+
 				using (var layout = new TextLayout(Container.DWFactory, str, format, float.PositiveInfinity, float.PositiveInfinity))
-					RenderTarget.DrawTextLayout(new RawVector2(0, Container.WindowHeight - layout.Metrics.Height), layout, Resource.Get<BrushResource>("ForegroundBrush").Brush);
+					DeviceContext.DrawTextLayout(new RawVector2(0, Container.WindowHeight - layout.Metrics.Height), layout, Resource.Get<BrushResource>("ForegroundBrush").Brush);
+			}
 		}
 
 		double beforeUpdateTime = 0;

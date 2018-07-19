@@ -14,12 +14,12 @@ namespace Ingen.Game.Framework
 			Resource = new ResourceLoader();
 		}
 
-		protected RenderTarget RenderTarget { get; private set; }
+		protected DeviceContext DeviceContext { get; private set; }
 
-		public virtual void UpdateRenderTarget(RenderTarget target)
+		public virtual void UpdateDevice(DeviceContext context)
 		{
-			RenderTarget = target;
-			Resource.UpdateRenderTarget(target);
+			DeviceContext = context;
+			Resource.UpdateDevice(context);
 		}
 
 		public abstract void Render();

@@ -40,10 +40,10 @@ namespace Ingen.Game
 			if (isFadeOut && FadeAnimation.Value == 1)
 				return;
 
-			using (var layer = new Layer(RenderTarget))
+			using (var layer = new Layer(DeviceContext))
 			{
 				parameter.Opacity = (isFadeOut ? 1 - FadeAnimation.Value : FadeAnimation.Value);
-				RenderTarget.PushLayer(ref parameter, layer);
+				DeviceContext.PushLayer(ref parameter, layer);
 
 				using (var layout = new TextLayout(Container.DWFactory, $"Now Loading...", format, float.PositiveInfinity, float.PositiveInfinity))
 				using (var layout2 = new TextLayout(Container.DWFactory, "🕛", format, float.PositiveInfinity, float.PositiveInfinity))
@@ -52,21 +52,21 @@ namespace Ingen.Game
 					const int Margin = 20;
 					const int SplitMargin = 5;
 
-					RenderTarget.FillRoundedRectangle(new RoundedRectangle
+					DeviceContext.FillRoundedRectangle(new RoundedRectangle
 					{
 						RadiusX = Radius,
 						RadiusY = Radius,
 						Rect = new RawRectangleF(Container.WindowWidth - layout.Metrics.Width - SplitMargin - layout2.Metrics.Width - Margin - Radius * 2, Container.WindowHeight - layout.Metrics.Height - Margin - Radius * 2, Container.WindowWidth - Radius * 2, Container.WindowHeight - Radius * 2)
 					}, Resource.Get<BrushResource>("Back").Brush);
 
-					RenderTarget.DrawTextLayout(new RawVector2(Container.WindowWidth - layout.Metrics.Width - Margin, Container.WindowHeight - layout.Metrics.Height - Margin), layout, Resource.Get<BrushResource>("Fore").Brush);
+					DeviceContext.DrawTextLayout(new RawVector2(Container.WindowWidth - layout.Metrics.Width - Margin, Container.WindowHeight - layout.Metrics.Height - Margin), layout, Resource.Get<BrushResource>("Fore").Brush);
 
 					var origin = new Vector2(Container.WindowWidth - layout.Metrics.Width - SplitMargin - layout2.Metrics.Width - Margin, Container.WindowHeight - layout.Metrics.Height - Margin);
-					RenderTarget.Transform = Matrix3x2.Rotation(LoopAnimation.Value * 360 * (float)Math.PI / 180, origin + new Vector2(layout2.Metrics.Width / 2, layout.Metrics.Height / 2));
-					RenderTarget.DrawTextLayout(origin, layout2, Resource.Get<BrushResource>("Fore").Brush);
-					RenderTarget.Transform = Matrix3x2.Identity;
+					DeviceContext.Transform = Matrix3x2.Rotation(LoopAnimation.Value * 360 * (float)Math.PI / 180, origin + new Vector2(layout2.Metrics.Width / 2, layout.Metrics.Height / 2));
+					DeviceContext.DrawTextLayout(origin, layout2, Resource.Get<BrushResource>("Fore").Brush);
+					DeviceContext.Transform = Matrix3x2.Identity;
 				}
-				RenderTarget.PopLayer();
+				DeviceContext.PopLayer();
 			}
 		}
 

@@ -34,7 +34,7 @@ namespace Ingen.Game
 		public override void Render()
 		{
 			using (var layout = new TextLayout(Container.DWFactory, "・", format, float.PositiveInfinity, float.PositiveInfinity))
-				RenderTarget.DrawTextLayout(CurrentPos - new Vector2(16, 16), layout, Resource.Get<BrushResource>("ForegroundBrush").Brush);
+				DeviceContext.DrawTextLayout(CurrentPos - new Vector2(16, 16), layout, Resource.Get<BrushResource>("ForegroundBrush").Brush);
 		}
 
 		protected override void Update()

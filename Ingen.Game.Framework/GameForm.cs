@@ -24,11 +24,9 @@ namespace Ingen.Game.Framework
 		#endregion
 		#region Direct2D Fields
 		D2D1.DeviceContext _d2d1DeviceContext;
-		public ref D2D1.DeviceContext D2D1DeviceContext => ref _d2d1DeviceContext;
+		public ref D2D1.DeviceContext DeviceContext => ref _d2d1DeviceContext;
 		D2D1.Factory1 _d2D1Factory;
 		public ref D2D1.Factory1 D2D1Factory => ref _d2D1Factory;
-		public ref D2D1.RenderTarget RenderTarget => ref _renderTarget;
-		D2D1.RenderTarget _renderTarget;
 		#endregion
 
 		public GameForm()
@@ -90,11 +88,7 @@ namespace Ingen.Game.Framework
 			#region Direct2D Initalize
 			D2D1Factory = new D2D1.Factory1();
 			using (var surface = BackBuffer.QueryInterface<DXGI.Surface>())
-			{
-				RenderTarget = new D2D1.RenderTarget(D2D1Factory, surface, new D2D1.RenderTargetProperties(new D2D1.PixelFormat(DXGI.Format.Unknown, D2D1.AlphaMode.Premultiplied)));
-				D2D1DeviceContext = new D2D1.DeviceContext(surface);
-			}
-			RenderTarget.AntialiasMode = D2D1.AntialiasMode.PerPrimitive;
+				DeviceContext = new D2D1.DeviceContext(surface);
 			#endregion
 			RenderTargetUpdated?.Invoke();
 		}
@@ -110,7 +104,6 @@ namespace Ingen.Game.Framework
 		}
 
 
-		private ManualResetEventSlim RenderPauseMre { get; set; } = new ManualResetEventSlim(true);
 		private ManualResetEventSlim NextRenderLogicTaskMre { get; set; } = new ManualResetEventSlim(true);
 		private Action NextRenderLogicTask;
 
@@ -131,11 +124,6 @@ namespace Ingen.Game.Framework
 			NextRenderLogicTaskMre.Wait();
 		}
 
-		protected override void OnPaint(PaintEventArgs e)
-		{
-			RenderPauseMre.Wait();
-			base.OnPaint(e);
-		}
 		public void BeginDraw()
 		{
 			NextRenderLogicTask?.Invoke();
@@ -143,20 +131,18 @@ namespace Ingen.Game.Framework
 			{
 				(System.Drawing.Size size, IntPtr hWnd) = ((System.Drawing.Size, IntPtr))Invoke(new Func<(System.Drawing.Size, IntPtr)>(() => (ClientSize, Handle)));
 
-				RenderPauseMre.Reset();
 				D3dDispose();
 				Initalize(size, hWnd);
 				NewSize = null;
 			}
-			RenderPauseMre.Set();
 			D3D11Device.ImmediateContext.Rasterizer.SetViewport(0, 0, ClientSize.Width, ClientSize.Height);
 			D3D11Device.ImmediateContext.OutputMerger.SetTargets(_backBufferView);
 
-			RenderTarget.BeginDraw();
+			DeviceContext.BeginDraw();
 		}
 		public void EndDraw()
 		{
-			RenderTarget.EndDraw();
+			DeviceContext.EndDraw();
 			SwapChain.Present(1, DXGI.PresentFlags.UseDuration);
 		}
 
@@ -195,10 +181,8 @@ namespace Ingen.Game.Framework
 
 			D2D1Factory?.Dispose();
 			D2D1Factory = null;
-			RenderTarget?.Dispose();
-			RenderTarget = null;
-			D2D1DeviceContext?.Dispose();
-			D2D1DeviceContext = null;
+			DeviceContext?.Dispose();
+			DeviceContext = null;
 		}
 		protected override void Dispose(bool disposing)
 		{
