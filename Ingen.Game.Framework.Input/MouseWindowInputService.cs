@@ -22,11 +22,7 @@ namespace Ingen.Game.Framework.Input
 
 		public void Update()
 		{
-			NativeMethods.POINT pos = new NativeMethods.POINT
-			{
-				X = Cursor.Position.X,
-				Y = Cursor.Position.Y,
-			};
+			Point pos = Cursor.Position;
 			NativeMethods.ScreenToClient(Container.GameWindowPtr, ref pos);
 			LastMousePosition = new RawVector2(pos.X, pos.Y);
 		}
