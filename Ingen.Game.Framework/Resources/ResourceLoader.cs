@@ -34,6 +34,7 @@ namespace Ingen.Game.Framework.Resources
 
 		public void Dispose()
 		{
+			if (Hashtable == null) return;
 			foreach (var resource in Hashtable.Values)
 				(resource as IResource).Dispose();
 			Hashtable.Clear();

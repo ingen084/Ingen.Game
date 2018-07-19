@@ -48,8 +48,19 @@ namespace Ingen.Game.Framework
 
 		public bool CanResize
 		{
-			get => GameWindow.CanResize;
-			set => GameWindow.CanResize = value;
+			get
+			{
+				if (GameWindow.InvokeRequired)
+					return (bool)GameWindow.Invoke(new Func<bool>(() => GameWindow.CanResize));
+				return GameWindow.CanResize;
+			}
+			set
+			{
+				if (GameWindow.InvokeRequired)
+					GameWindow.Invoke(new Action(() => GameWindow.CanResize = value));
+				else
+					GameWindow.CanResize = value;
+			}
 		}
 
 		private CancellationTokenSource TasksCancellationTokenSource;
@@ -102,7 +113,7 @@ namespace Ingen.Game.Framework
 			TasksCancellationTokenSource = new CancellationTokenSource();
 			RenderTask = new Task(Render, TasksCancellationTokenSource.Token, TaskCreationOptions.LongRunning);
 			if (!IsLinkFrameAndLogic)
-				LogicTask = new Task(Logic, TasksCancellationTokenSource.Token, TaskCreationOptions.LongRunning);
+				LogicTask = new Task(Update, TasksCancellationTokenSource.Token, TaskCreationOptions.LongRunning);
 
 			GameWindow.RenderTargetUpdated += () =>
 			{
@@ -157,8 +168,8 @@ namespace Ingen.Game.Framework
 			GameWindow.ShowDialog();
 
 			TasksCancellationTokenSource.Cancel();
-			LogicTask?.Wait();
-			RenderTask.Wait();
+			//LogicTask?.Wait();
+			//RenderTask.Wait();
 			Stopwatch.Stop();
 		}
 
@@ -189,7 +200,7 @@ namespace Ingen.Game.Framework
 		}
 
 		TimeSpan beforeLogicTime;
-		void Logic()
+		void Update()
 		{
 			while (!TasksCancellationTokenSource.Token.IsCancellationRequested)
 			{

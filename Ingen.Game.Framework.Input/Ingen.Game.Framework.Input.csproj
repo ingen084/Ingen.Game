@@ -6,10 +6,15 @@
 
   <ItemGroup>
     <PackageReference Include="SharpDX.DirectInput" Version="4.1.0" />
+    <PackageReference Include="Unity" Version="5.8.6" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Ingen.Game.Framework\Ingen.Game.Framework.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
 
 </Project>

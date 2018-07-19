@@ -18,11 +18,12 @@ namespace Ingen.Game
 					TpsRate = 30,
 					CanResize = true
 				}
-				.UseInputService())
+				.UseMouseWindowInputService())
 			{
 				var lo = container.Resolve<LoadingOverlay>();
 				container.AddOverlay(lo);
 				container.AddOverlay(container.Resolve<DebugOverlay>());
+				container.AddOverlay(container.Resolve<MouseCursorTestOverlay>());
 				var ts = new FadeTransitionScene(lo, container, TimeSpan.FromSeconds(.25));
 				container.AddSingleton(ts);
 				ts.Initalize<SampleScene>(null);
