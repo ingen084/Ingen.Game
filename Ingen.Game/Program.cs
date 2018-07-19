@@ -13,10 +13,10 @@ namespace Ingen.Game
 		public static void Main()
 		{
 			using (var container = new GameContainer(false, "Game Sample", 640, 480)
-				{
-					TpsRate = 30,
-					CanResize = true
-				}
+			{
+				TpsRate = 30,
+				CanResize = true
+			}
 				.UseMouseInputService())
 			{
 				var lo = container.Resolve<LoadingOverlay>();
@@ -52,8 +52,8 @@ namespace Ingen.Game
 			{
 				RenderTarget.Clear(Color.CornflowerBlue);
 
-				RenderTarget.Transform = Matrix3x2.Rotation(position * 0.018f, new Vector2(position + 50, 150));
-				RenderTarget.DrawBitmap(Resource, "Image", new RawRectangleF(position, 100, position + 100, 200));
+				RenderTarget.Transform = Matrix3x2.Rotation(position * 0.018f, new Vector2(position + 50, position + 150));
+				RenderTarget.DrawBitmap(Resource, "Image", new RawRectangleF(position, position + 100, position + 100, position + 200));
 				RenderTarget.Transform = Matrix3x2.Identity;
 			}
 
