@@ -1,6 +1,7 @@
 ﻿using Ingen.Game.Framework;
 using Ingen.Game.Framework.Input;
 using Ingen.Game.Framework.Resources.Brushes;
+using SharpDX;
 using SharpDX.DirectWrite;
 using SharpDX.Mathematics.Interop;
 using System;
@@ -32,10 +33,8 @@ namespace Ingen.Game
 
 		public override void Render()
 		{
-			using (var layout = new TextLayout(Container.DWFactory, $"{CurrentPos.X},{CurrentPos.Y}", format, float.PositiveInfinity, float.PositiveInfinity))
-				RenderTarget.DrawTextLayout(new RawVector2(0, 0), layout, Resource.Get<BrushResource>("ForegroundBrush").Brush);
-			using (var layout = new TextLayout(Container.DWFactory, "↖", format, float.PositiveInfinity, float.PositiveInfinity))
-				RenderTarget.DrawTextLayout(CurrentPos, layout, Resource.Get<BrushResource>("ForegroundBrush").Brush);
+			using (var layout = new TextLayout(Container.DWFactory, "・", format, float.PositiveInfinity, float.PositiveInfinity))
+				RenderTarget.DrawTextLayout(CurrentPos - new Vector2(16, 16), layout, Resource.Get<BrushResource>("ForegroundBrush").Brush);
 		}
 
 		protected override void Update()
@@ -54,8 +53,8 @@ namespace Ingen.Game
 			//	CurrentPos.Y = 0;
 
 			CurrentPos = MouseInputService.LastPosition;
-			//memo 終了テスト
-			if (CurrentPos.X < -100 && CurrentPos.Y < -100)
+			//memo 中ボタンクリックで終了のテスト
+			if (MouseInputService.LastMouseState.Buttons[2])
 				Container.Shutdown();
 		}
 
