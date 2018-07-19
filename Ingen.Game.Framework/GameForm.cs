@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
 using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Windows.Forms;
 using D2D1 = SharpDX.Direct2D1;
@@ -157,6 +158,28 @@ namespace Ingen.Game.Framework
 		{
 			RenderTarget.EndDraw();
 			SwapChain.Present(1, DXGI.PresentFlags.UseDuration);
+		}
+
+		public bool IsClosing { get; set; }
+		protected override void OnClosing(CancelEventArgs e)
+		{
+			if (!IsForceClosing)
+			{
+				e.Cancel = true;
+				return;
+			}
+			base.OnClosing(e);
+		}
+		bool IsForceClosing = false;
+		internal void ForceClose()
+		{
+			IsForceClosing = true;
+			try
+			{
+				Invoke(new Action(() => Close()));
+			}
+			catch (ObjectDisposedException) { } //Invoke使ってるので仕方ない
+			return;
 		}
 
 		private void D3dDispose()

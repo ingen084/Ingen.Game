@@ -17,6 +17,7 @@ namespace Ingen.Game.Framework
 		public UnityContainer Container { get; }
 
 		public GameForm GameWindow { get; }
+		public IntPtr GameWindowPtr { get; private set; }
 
 		#region DW/WIC
 		WIC.ImagingFactory _imagingFactory;
@@ -158,6 +159,7 @@ namespace Ingen.Game.Framework
 		{
 			CurrentScene = startupScene;
 			GameWindow.Initalize();
+			GameWindowPtr = GameWindow.Handle;
 
 			Stopwatch.Start();
 			RenderTask.Start();
@@ -166,12 +168,21 @@ namespace Ingen.Game.Framework
 			LogicTask?.Start();
 
 			GameWindow.ShowDialog();
-
-			TasksCancellationTokenSource.Cancel();
-			//LogicTask?.Wait();
-			//RenderTask.Wait();
-			Stopwatch.Stop();
 		}
+
+		public void Shutdown()
+		{
+			Task.Run(() =>
+			{
+				TasksCancellationTokenSource.Cancel();
+				LogicTask?.Wait();
+				RenderTask.Wait();
+				Stopwatch.Stop();
+
+				GameWindow.ForceClose();
+			});
+		}
+
 
 		TimeSpan beforeRenderTime;
 		void Render()
@@ -225,8 +236,8 @@ namespace Ingen.Game.Framework
 			CurrentScene?.Dispose();
 			lock (Overlays)
 				Overlays.ForEach(o => o.Dispose());
-			GameWindow?.Dispose();
 			Container?.Dispose();
+			GameWindow?.Dispose();
 			Debug.WriteLine("GameContainer Disposed");
 		}
 	}

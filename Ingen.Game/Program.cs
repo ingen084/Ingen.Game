@@ -1,6 +1,5 @@
 ﻿using Ingen.Game.Framework;
 using Ingen.Game.Framework.Resources;
-using Ingen.Game.Framework.Resources.Images;
 using Ingen.Game.Scenes;
 using SharpDX;
 using SharpDX.Direct2D1;

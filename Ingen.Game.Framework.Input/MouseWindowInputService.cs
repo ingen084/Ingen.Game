@@ -22,12 +22,13 @@ namespace Ingen.Game.Framework.Input
 
 		public void Update()
 		{
-			try
+			NativeMethods.POINT pos = new NativeMethods.POINT
 			{
-				var pos = (Point)Container.GameWindow.Invoke(new Func<Point>(() => Container.GameWindow.PointToClient(Cursor.Position)));
-				LastMousePosition = new RawVector2(pos.X, pos.Y);
-			}
-			catch (ObjectDisposedException) { }
+				X = Cursor.Position.X,
+				Y = Cursor.Position.Y,
+			};
+			NativeMethods.ScreenToClient(Container.GameWindowPtr, ref pos);
+			LastMousePosition = new RawVector2(pos.X, pos.Y);
 		}
 
 		public void Dispose()

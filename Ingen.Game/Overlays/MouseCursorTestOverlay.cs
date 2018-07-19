@@ -27,7 +27,7 @@ namespace Ingen.Game
 			MouseWindowInputService = windowInputService;
 
 			Resource.AddResource("ForegroundBrush", new SolidColorBrushResource(new RawColor4(1, 1, 1, .9f)));
-			format = new TextFormat(Container.DWFactory, "MS Gothic", FontWeight.Normal, FontStyle.Normal, 20);
+			format = new TextFormat(Container.DWFactory, "MS Gothic", FontWeight.Bold, FontStyle.Normal, 32);
 		}
 
 		public override int Priority => 2;
@@ -59,6 +59,9 @@ namespace Ingen.Game
 				return;
 			}
 			CurrentPos = MouseWindowInputService.LastMousePosition;
+			//memo 終了テスト
+			if (CurrentPos.X < -100 && CurrentPos.Y < -100)
+				Container.Shutdown();
 		}
 
 		public override void Dispose()
