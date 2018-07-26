@@ -5,6 +5,6 @@ namespace Ingen.Game.Framework.Resources
 {
 	public interface IResource : IDisposable
 	{
-		void UpdateDevice(DeviceContext context);
+		void UpdateDevice(GameContainer container);
 	}
 }

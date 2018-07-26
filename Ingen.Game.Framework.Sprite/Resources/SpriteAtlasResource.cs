@@ -6,19 +6,26 @@ namespace Ingen.Game.Framework.Resources.Sprite
 {
 	public class SpriteAtlasResource : IResource
 	{
-		ImageResource ImageResource { get; set; }
+		public ImageResource ImageResource { get; private set; }
+		GameContainer Container;
 
 		public SpriteAtlasResource(ImageResource baseImageResource)
 		{
 			ImageResource = baseImageResource;
 		}
 
-		public SpriteResource GetSprite(RawRectangle rect)
-			=> new SpriteResource(this, rect);
-
-		public void UpdateDevice(DeviceContext context)
+		public SpriteResource MakeSprite(RawRectangle rect)
 		{
-			ImageResource.UpdateDevice(context);
+			var resource = new SpriteResource(this, rect);
+			if (Container != null)
+				resource.UpdateDevice(Container);
+			return resource;
+		}
+
+		public void UpdateDevice(GameContainer container)
+		{
+			ImageResource.UpdateDevice(container);
+			Container = container;
 		}
 
 		public void Dispose()

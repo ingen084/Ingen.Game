@@ -1,5 +1,6 @@
 ﻿using Ingen.Game.Framework.Resources;
 using SharpDX.Direct2D1;
+using DXGI = SharpDX.DXGI;
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ namespace Ingen.Game.Framework
 	public abstract class Scene : INotifyCompletion, IDisposable
 	{
 		protected ResourceLoader Resource { get; }
+		internal Bitmap1 BackBuffer { get; private set; }
 		public Scene()
 		{
 			Resource = new ResourceLoader();
@@ -16,10 +18,14 @@ namespace Ingen.Game.Framework
 
 		protected DeviceContext DeviceContext { get; private set; }
 
-		public virtual void UpdateDevice(DeviceContext context)
+		public virtual void UpdateDevice(GameContainer container)
 		{
-			DeviceContext = context;
-			Resource.UpdateDevice(context);
+			DeviceContext = container.DeviceContext;
+			Resource.UpdateDevice(container);
+
+			BackBuffer?.Dispose();
+			BackBuffer = null;
+			//BackBuffer = new Bitmap1(container.DeviceContext, container.D2D1BackBuffer.PixelSize);
 		}
 
 		public abstract void Render();
@@ -47,6 +53,8 @@ namespace Ingen.Game.Framework
 
 		public virtual void Dispose()
 		{
+			BackBuffer?.Dispose();
+			BackBuffer = null;
 			Resource.Dispose();
 		}
 

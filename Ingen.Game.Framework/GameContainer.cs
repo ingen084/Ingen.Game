@@ -9,6 +9,9 @@ using Unity;
 using Unity.Lifetime;
 using DW = SharpDX.DirectWrite;
 using WIC = SharpDX.WIC;
+using D2D1 = SharpDX.Direct2D1;
+using D3D11 = SharpDX.Direct3D11;
+using DXGI = SharpDX.DXGI;
 
 namespace Ingen.Game.Framework
 {
@@ -17,7 +20,17 @@ namespace Ingen.Game.Framework
 		public UnityContainer Container { get; }
 
 		public GameForm GameWindow { get; }
-		public IntPtr GameWindowPtr { get; private set; }
+		public IntPtr GameWindowHandle { get; private set; }
+
+		#region GameWindow DirextX Instances
+		public ref D3D11.Device D3D11Device => ref GameWindow.D3D11Device;
+		public ref D3D11.Texture2D BackBuffer => ref GameWindow.BackBuffer;
+		public ref DXGI.SwapChain SwapChain => ref GameWindow.SwapChain;
+		public ref D3D11.RenderTargetView BackBufferView => ref GameWindow.BackBufferView;
+		public ref D2D1.DeviceContext DeviceContext => ref GameWindow.DeviceContext;
+		public ref D2D1.Factory1 D2D1Factory => ref GameWindow.D2D1Factory;
+		public ref D2D1.Bitmap1 D2D1BackBuffer => ref GameWindow.D2D1BackBuffer;
+		#endregion
 
 		#region DW/WIC
 		WIC.ImagingFactory _imagingFactory;
@@ -25,7 +38,7 @@ namespace Ingen.Game.Framework
 		DW.Factory _dWFactory;
 		public ref DW.Factory DWFactory => ref _dWFactory;
 		#endregion
-
+		
 		private Scene _currentScene;
 		public Scene CurrentScene
 		{
@@ -74,7 +87,7 @@ namespace Ingen.Game.Framework
 		public void AddOverlay(Overlay overlay)
 		{
 			if (GameWindow?.DeviceContext != null)
-				overlay.UpdateDevice(GameWindow.DeviceContext);
+				overlay.UpdateDevice(this);
 			for (var i = 0; i < Overlays.Count; i++)
 				if (overlay.Priority <= Overlays[i].Priority)
 				{
@@ -118,10 +131,10 @@ namespace Ingen.Game.Framework
 
 			GameWindow.RenderTargetUpdated += () =>
 			{
-				GlobalResource.UpdateDevice(GameWindow.DeviceContext);
-				CurrentScene.UpdateDevice(GameWindow.DeviceContext);
+				GlobalResource.UpdateDevice(this);
+				CurrentScene.UpdateDevice(this);
 
-				Overlays.ForEach(o => o.UpdateDevice(GameWindow.DeviceContext));
+				Overlays.ForEach(o => o.UpdateDevice(this));
 			};
 			GameWindow.WindowSizeChanged += size =>
 			{
@@ -149,7 +162,7 @@ namespace Ingen.Game.Framework
 
 			GameWindow.SetActionAndWaitNextFrame(new Action(() =>
 			{
-				loadingScene.UpdateDevice(GameWindow.DeviceContext);
+				loadingScene.UpdateDevice(this);
 				loadingScene.Initalize<TScene>(CurrentScene);
 				CurrentScene = loadingScene;
 			}));
@@ -159,7 +172,7 @@ namespace Ingen.Game.Framework
 		{
 			CurrentScene = startupScene;
 			GameWindow.Initalize();
-			GameWindowPtr = GameWindow.Handle;
+			GameWindowHandle = GameWindow.Handle;
 
 			Stopwatch.Start();
 			RenderTask.Start();

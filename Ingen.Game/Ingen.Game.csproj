@@ -52,6 +52,10 @@
       <Project>{5ea92375-9386-4eb1-9eb6-0abf4832e98e}</Project>
       <Name>Ingen.Game.Framework.Input</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Ingen.Game.Framework.Sprite\Ingen.Game.Framework.Sprite.csproj">
+      <Project>{8aa15d6a-13dc-432f-adcb-83db7dd542d2}</Project>
+      <Name>Ingen.Game.Framework.Sprite</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Ingen.Game.Framework\Ingen.Game.Framework.csproj">
       <Project>{AD0AC3E1-04F2-4570-9A89-6CA87F7F2B78}</Project>
       <Name>Ingen.Game.Framework</Name>

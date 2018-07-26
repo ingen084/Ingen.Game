@@ -9,10 +9,10 @@ namespace Ingen.Game.Framework.Resources.Brushes
 		public Brush Brush => _brush;
 
 		protected abstract void CreateBrush(RenderTarget target);
-		public void UpdateDevice(DeviceContext context)
+		public void UpdateDevice(GameContainer container)
 		{
 			Dispose();
-			CreateBrush(context);
+			CreateBrush(container.DeviceContext);
 		}
 
 		public void Dispose()

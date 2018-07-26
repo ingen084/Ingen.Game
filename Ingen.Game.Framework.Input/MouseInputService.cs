@@ -31,7 +31,7 @@ namespace Ingen.Game.Framework.Input
 		{
 			LastMouseState = device?.GetCurrentState();
 			Point pos = Cursor.Position;
-			NativeMethods.ScreenToClient(Container.GameWindowPtr, ref pos);
+			NativeMethods.ScreenToClient(Container.GameWindowHandle, ref pos);
 			LastPosition = new RawVector2(pos.X, pos.Y);
 		}
 

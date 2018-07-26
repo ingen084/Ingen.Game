@@ -78,11 +78,11 @@ namespace Ingen.Game.Scenes
 
 			IsNeedLoadingScreen = (DisposeTiming == Timing.Before || InitalizeTiming == Timing.After);
 		}
-		public override void UpdateDevice(DeviceContext context)
+		public override void UpdateDevice(GameContainer container)
 		{
-			base.UpdateDevice(context);
-			CurrentScene?.UpdateDevice(context);
-			NextScene?.UpdateDevice(context);
+			base.UpdateDevice(container);
+			CurrentScene?.UpdateDevice(container);
+			NextScene?.UpdateDevice(container);
 		}
 
 
@@ -151,7 +151,7 @@ namespace Ingen.Game.Scenes
 					CurrentScene?.Dispose();
 					CurrentScene = null;
 					NextScene = (Scene)Container.Resolve(NextSceneType);
-					Container.GameWindow.SetActionAndWaitNextFrame(() => NextScene.UpdateDevice(DeviceContext)); //todo FormsのDLLを使用しないといけないのはいささか不本意である。
+					Container.GameWindow.SetActionAndWaitNextFrame(() => NextScene.UpdateDevice(Container)); //todo FormsのDLLを使用しないといけないのはいささか不本意である。
 				}));
 				Overlay.IsShown = false;
 
@@ -169,7 +169,7 @@ namespace Ingen.Game.Scenes
 			await SkipTick(Task.Run(() =>
 			{
 				NextScene = (Scene)Container.Resolve(NextSceneType);
-				Container.GameWindow.SetActionAndWaitNextFrame(() => NextScene.UpdateDevice(DeviceContext)); //todo FormsのDLLを使用しないといけないのはいささか不本意である。
+				Container.GameWindow.SetActionAndWaitNextFrame(() => NextScene.UpdateDevice(Container)); //todo FormsのDLLを使用しないといけないのはいささか不本意である。
 			}));
 
 			//(読み込み画面が必要ないときに)読み込みが完了したので移行開始

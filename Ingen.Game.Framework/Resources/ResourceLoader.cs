@@ -26,10 +26,10 @@ namespace Ingen.Game.Framework.Resources
 		public TResource Get<TResource>(object key) where TResource : class, IResource
 			=> Hashtable[key] as TResource;
 
-		public void UpdateDevice(DeviceContext context)
+		public void UpdateDevice(GameContainer container)
 		{
 			foreach (var resource in Hashtable.Values)
-				(resource as IResource).UpdateDevice(context);
+				(resource as IResource).UpdateDevice(container);
 		}
 
 		public void Dispose()

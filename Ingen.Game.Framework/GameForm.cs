@@ -27,6 +27,9 @@ namespace Ingen.Game.Framework
 		public ref D2D1.DeviceContext DeviceContext => ref _d2d1DeviceContext;
 		D2D1.Factory1 _d2D1Factory;
 		public ref D2D1.Factory1 D2D1Factory => ref _d2D1Factory;
+
+		D2D1.Bitmap1 _d2D1BackBuffer;
+		public ref D2D1.Bitmap1 D2D1BackBuffer => ref _d2D1BackBuffer;
 		#endregion
 
 		public GameForm()
@@ -88,7 +91,10 @@ namespace Ingen.Game.Framework
 			#region Direct2D Initalize
 			D2D1Factory = new D2D1.Factory1();
 			using (var surface = BackBuffer.QueryInterface<DXGI.Surface>())
+			{
 				DeviceContext = new D2D1.DeviceContext(surface);
+				D2D1BackBuffer = new D2D1.Bitmap1(DeviceContext, surface);
+			}
 			#endregion
 			RenderTargetUpdated?.Invoke();
 		}
@@ -183,6 +189,8 @@ namespace Ingen.Game.Framework
 			D2D1Factory = null;
 			DeviceContext?.Dispose();
 			DeviceContext = null;
+			D2D1BackBuffer?.Dispose();
+			D2D1BackBuffer = null;
 		}
 		protected override void Dispose(bool disposing)
 		{

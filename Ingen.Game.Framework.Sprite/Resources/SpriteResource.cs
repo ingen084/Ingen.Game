@@ -2,6 +2,7 @@
 using Ingen.Game.Framework.Sprite;
 using SharpDX;
 using SharpDX.Direct2D1;
+using SharpDX.Direct2D1.Effects;
 using SharpDX.Mathematics.Interop;
 using System;
 
@@ -13,11 +14,11 @@ namespace Ingen.Game.Framework.Resources.Sprite
 		readonly SpriteAtlasResource ParentAtlas;
 		RawRectangleF Rect;
 
-		Effect AtlasEffect;
+		public Effect Effect => CropEffect ?? (BitmapSourceEffect as Effect);
+		private Crop CropEffect;
+		private BitmapSource BitmapSourceEffect;
 
 		Size2 Size;
-
-		static Guid AtlasEffectGuid = new Guid(0x913e2be4, 0xfdcf, 0x4fe2, 0xa5, 0xf0, 0x24, 0x54, 0xf1, 0x4f, 0xf4, 0x8);
 
 		public SpriteResource(ImageResource baseImage)
 		{
@@ -27,28 +28,40 @@ namespace Ingen.Game.Framework.Resources.Sprite
 		public SpriteResource(SpriteAtlasResource parentAtlas, RawRectangle rect)
 		{
 			ParentAtlas = parentAtlas ?? throw new ArgumentNullException(nameof(parentAtlas));
-			Size = BaseImage.Image.PixelSize;
 			Rect = new RawRectangleF(rect.Left, rect.Top, rect.Right, rect.Bottom);
 			Size = new Size2(rect.Right - rect.Left, rect.Bottom - rect.Top);
 		}
 
-		public void UpdateDevice(DeviceContext context)
+		public void UpdateDevice(GameContainer container)
 		{
-			if (BaseImage == null)
+
+			if (BaseImage != null)
 			{
-				AtlasEffect = new Effect(context, AtlasEffectGuid);
-				AtlasEffect.SetValue((int)AtlasProperties.InputRectangle, Rect);
+				BaseImage.UpdateDevice(container);
+				BitmapSourceEffect?.Dispose();
+				BitmapSourceEffect = new BitmapSource(container.DeviceContext);
+				BitmapSourceEffect.SetInput(0, BaseImage.Image, true);
 				return;
 			}
-			BaseImage.UpdateDevice(context);
+
+			CropEffect?.Dispose();
+			CropEffect = new Crop(container.DeviceContext);
+		}
+
+		internal void Render(DeviceContext context)
+		{
+			CropEffect.SetInput(0, ParentAtlas.ImageResource.Image, true);
+			CropEffect.SetValue((int)CropProperties.Rectangle, Rect);
+			context.DrawImage(Effect);
+			CropEffect.SetInput(0, null, true);
 		}
 
 		public void Dispose()
 		{
 			if (BaseImage == null)
 			{
-				AtlasEffect.Dispose();
-				AtlasEffect = null;
+				CropEffect.Dispose();
+				CropEffect = null;
 				return;
 			}
 			BaseImage.Dispose();
