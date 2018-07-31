@@ -1,6 +1,7 @@
 ﻿using Ingen.Game.Framework;
 using Ingen.Game.Framework.Resources;
 using Ingen.Game.Framework.Resources.Images;
+using Ingen.Game.Framework.Resources.Sprite;
 using Ingen.Game.Scenes;
 using SharpDX;
 using SharpDX.Direct2D1;
@@ -36,6 +37,7 @@ namespace Ingen.Game
 		{
 			public GameContainer Container { get; set; }
 			FadeTransitionScene TransitionScene { get; }
+			Framework.Sprite.SpriteBatch SpriteBatch { get; }
 
 			public SampleScene(GameContainer container, FadeTransitionScene tscene)
 			{
@@ -45,11 +47,12 @@ namespace Ingen.Game
 				position = 10;
 				Resource.AddSolidColorBrushResource("MainBrush", new RawColor4(1, 1, 1, 1));
 				Resource.AddPngImageResource("Image", Container.ImagingFactory, @"D:\ingen\Desktop\saikoro_145.png");
+				Resource.AddPngImageSprite("Saikoro", Container.ImagingFactory, @"D:\ingen\Desktop\saikoro_145.png");
 				var atlas = Resource.AddSpriteAtlas("ImageAtlas", Resource.Get<ImageResource>("Image"));
 				Resource.AddResource("Sprite", atlas.MakeSprite(new RawRectangle(100, 50, 200, 100)));
 
-				//var b = new SpriteBatch(IntPtr.Zero);
-				//b.
+
+				SpriteBatch = new Framework.Sprite.SpriteBatch(container);
 
 				System.Threading.Thread.Sleep(1000);
 			}
@@ -63,6 +66,12 @@ namespace Ingen.Game
 				DeviceContext.Transform = Matrix3x2.Transformation(1, 1, 0, 10, 10);
 				DeviceContext.DrawSprite(Resource, "Sprite");
 				DeviceContext.Transform = Matrix3x2.Identity;
+
+				SpriteBatch.Begin();
+
+				SpriteBatch.Draw(Resource.Get<SpriteResource>("Saikoro"), new Vector2(position + 100, 150), position * 0.018f);
+
+				SpriteBatch.End();
 			}
 
 			float position;

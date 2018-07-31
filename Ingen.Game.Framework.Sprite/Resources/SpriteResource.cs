@@ -8,28 +8,23 @@ using System;
 
 namespace Ingen.Game.Framework.Resources.Sprite
 {
-	public class SpriteResource : IResource, ISprite
+	public class SpriteResource : IResource
 	{
 		ImageResource BaseImage;
 		readonly SpriteAtlasResource ParentAtlas;
-		RawRectangleF Rect;
+		public RawRectangleF Rect { get; private set; }
 
-		public Effect Effect => CropEffect ?? (BitmapSourceEffect as Effect);
 		private Crop CropEffect;
-		private BitmapSource BitmapSourceEffect;
 
-		Size2 Size;
 
 		public SpriteResource(ImageResource baseImage)
 		{
 			BaseImage = baseImage ?? throw new ArgumentNullException(nameof(baseImage));
-			Size = BaseImage.Image.PixelSize;
 		}
 		public SpriteResource(SpriteAtlasResource parentAtlas, RawRectangle rect)
 		{
 			ParentAtlas = parentAtlas ?? throw new ArgumentNullException(nameof(parentAtlas));
 			Rect = new RawRectangleF(rect.Left, rect.Top, rect.Right, rect.Bottom);
-			Size = new Size2(rect.Right - rect.Left, rect.Bottom - rect.Top);
 		}
 
 		public void UpdateDevice(GameContainer container)
@@ -38,9 +33,8 @@ namespace Ingen.Game.Framework.Resources.Sprite
 			if (BaseImage != null)
 			{
 				BaseImage.UpdateDevice(container);
-				BitmapSourceEffect?.Dispose();
-				BitmapSourceEffect = new BitmapSource(container.DeviceContext);
-				BitmapSourceEffect.SetInput(0, BaseImage.Image, true);
+				var size = BaseImage.Image.PixelSize;
+				Rect = new RawRectangleF(0, 0, size.Width, size.Height);
 				return;
 			}
 
@@ -50,10 +44,15 @@ namespace Ingen.Game.Framework.Resources.Sprite
 
 		internal void Render(DeviceContext context)
 		{
-			CropEffect.SetInput(0, ParentAtlas.ImageResource.Image, true);
-			CropEffect.SetValue((int)CropProperties.Rectangle, Rect);
-			context.DrawImage(Effect);
-			CropEffect.SetInput(0, null, true);
+			if (BaseImage == null)
+			{
+				CropEffect.SetInput(0, ParentAtlas.ImageResource.Image, true);
+				CropEffect.SetValue((int)CropProperties.Rectangle, Rect);
+				context.DrawImage(CropEffect);
+				CropEffect.SetInput(0, null, true);
+				return;
+			}
+			context.DrawImage(BaseImage.Image);
 		}
 
 		public void Dispose()

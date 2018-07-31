@@ -23,8 +23,8 @@ namespace Ingen.Game.Framework
 		public ref D3D11.RenderTargetView BackBufferView => ref _backBufferView;
 		#endregion
 		#region Direct2D Fields
-		D2D1.DeviceContext _d2d1DeviceContext;
-		public ref D2D1.DeviceContext DeviceContext => ref _d2d1DeviceContext;
+		D2D1.DeviceContext3 _d2d1DeviceContext;
+		public ref D2D1.DeviceContext3 DeviceContext => ref _d2d1DeviceContext;
 		D2D1.Factory1 _d2D1Factory;
 		public ref D2D1.Factory1 D2D1Factory => ref _d2D1Factory;
 
@@ -92,7 +92,8 @@ namespace Ingen.Game.Framework
 			D2D1Factory = new D2D1.Factory1();
 			using (var surface = BackBuffer.QueryInterface<DXGI.Surface>())
 			{
-				DeviceContext = new D2D1.DeviceContext(surface);
+				using (var context0 = new D2D1.DeviceContext(surface))
+					DeviceContext = context0.QueryInterface<D2D1.DeviceContext3>();
 				D2D1BackBuffer = new D2D1.Bitmap1(DeviceContext, surface);
 			}
 			#endregion

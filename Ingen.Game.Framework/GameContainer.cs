@@ -27,7 +27,7 @@ namespace Ingen.Game.Framework
 		public ref D3D11.Texture2D BackBuffer => ref GameWindow.BackBuffer;
 		public ref DXGI.SwapChain SwapChain => ref GameWindow.SwapChain;
 		public ref D3D11.RenderTargetView BackBufferView => ref GameWindow.BackBufferView;
-		public ref D2D1.DeviceContext DeviceContext => ref GameWindow.DeviceContext;
+		public ref D2D1.DeviceContext3 DeviceContext => ref GameWindow.DeviceContext;
 		public ref D2D1.Factory1 D2D1Factory => ref GameWindow.D2D1Factory;
 		public ref D2D1.Bitmap1 D2D1BackBuffer => ref GameWindow.D2D1BackBuffer;
 		#endregion

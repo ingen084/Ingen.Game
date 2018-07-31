@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="SharpDX.Direct2D1" Version="4.1.0" />
+    <PackageReference Include="SharpDX.Mathematics" Version="4.1.0" />
   </ItemGroup>
 
   <ItemGroup>
