@@ -24,6 +24,7 @@ namespace Ingen.Game
 		{
 			Container = container;
 			MouseInputService = windowInputService;
+			MouseInputService.IsRendertimeUpdate = true;
 
 			Resource.AddResource("ForegroundBrush", new SolidColorBrushResource(new RawColor4(1, 1, 1, .9f)));
 			format = new TextFormat(Container.DWFactory, "MS Gothic", FontWeight.Bold, FontStyle.Normal, 32);
@@ -33,6 +34,7 @@ namespace Ingen.Game
 
 		public override void Render()
 		{
+			CurrentPos = MouseInputService.LastPosition;
 			using (var layout = new TextLayout(Container.DWFactory, "・", format, float.PositiveInfinity, float.PositiveInfinity))
 				DeviceContext.DrawTextLayout(CurrentPos - new Vector2(16, 16), layout, Resource.Get<BrushResource>("ForegroundBrush").Brush);
 		}
@@ -52,7 +54,6 @@ namespace Ingen.Game
 			//if (CurrentPos.Y < 0)
 			//	CurrentPos.Y = 0;
 
-			CurrentPos = MouseInputService.LastPosition;
 			//memo 中ボタンクリックで終了のテスト
 			if (MouseInputService.LastMouseState.Buttons[2])
 				Container.Shutdown();
