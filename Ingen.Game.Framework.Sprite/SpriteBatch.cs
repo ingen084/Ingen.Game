@@ -15,11 +15,14 @@ namespace Ingen.Game.Framework.Sprite
 	{
 		GameContainer Container { get; }
 		LinkedList<SpriteRenderParameter> RenderParameters { get; }
+		D2D1SpriteBatch Batch { get; set; }
 
 		public SpriteBatch(GameContainer container)
 		{
 			Container = container;
 			RenderParameters = new LinkedList<SpriteRenderParameter>();
+			//Batch = new D2D1SpriteBatch(Container.DeviceContext);
+			//Batch.
 		}
 
 		bool Begining;

@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SharpDX.DirectInput" Version="4.1.0" />
-    <PackageReference Include="Unity" Version="5.8.6" />
+    <PackageReference Include="SharpDX.DirectInput" Version="4.2.0" />
+    <PackageReference Include="Unity" Version="5.10.3" />
   </ItemGroup>
 
   <ItemGroup>

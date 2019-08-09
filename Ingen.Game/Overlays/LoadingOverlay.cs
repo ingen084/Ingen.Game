@@ -20,7 +20,7 @@ namespace Ingen.Game
 		{
 			Resource.AddResource("Fore", new SolidColorBrushResource(new RawColor4(1, 0.64705882352941176470588235294118f, 0, 1)));
 			Resource.AddResource("Back", new SolidColorBrushResource(new RawColor4(1, 1, 1, .3f)));
-			format = new TextFormat(container.DWFactory, "Nishiki-teki", 32);
+			format = new TextFormat(container.DWFactory, "Consolas", 32);
 
 			Container = container;
 
