@@ -14,22 +14,20 @@ namespace Ingen.Game
 	{
 		public static void Main()
 		{
-			using (var container = new GameContainer(false, "Game Sample", 640, 480)
+			using var container = new GameContainer(false, "Game Sample", 640, 480)
 			{
 				TpsRate = 30,
 				CanResize = true
-			}
-				.UseMouseInputService())
-			{
-				var lo = container.Resolve<LoadingOverlay>();
-				container.AddOverlay(lo);
-				container.AddOverlay(container.Resolve<DebugOverlay>());
-				container.AddOverlay(container.Resolve<MouseCursorTestOverlay>());
-				var ts = new FadeTransitionScene(lo, container, TimeSpan.FromSeconds(.25));
-				container.AddSingleton(ts);
-				ts.Initalize<SampleScene>(null);
-				container.Start(ts);
-			}
+			}.UseMouseInputService();
+
+			var lo = container.Resolve<LoadingOverlay>();
+			container.AddOverlay(lo);
+			container.AddOverlay(container.Resolve<DebugOverlay>());
+			container.AddOverlay(container.Resolve<MouseCursorTestOverlay>());
+			var ts = new FadeTransitionScene(lo, container, TimeSpan.FromSeconds(.25));
+			container.AddSingleton(ts);
+			ts.Initalize<SampleScene>(null);
+			container.Start(ts);
 		}
 
 		[NavigateOptions(Timing.Before, Timing.After)]

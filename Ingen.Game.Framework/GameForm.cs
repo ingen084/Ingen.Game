@@ -53,24 +53,16 @@ namespace Ingen.Game.Framework
 			}
 		}
 
-		public void Initalize(System.Drawing.Size? nSize = null, IntPtr? nhWnd = null)
+		public void Initalize()
 		{
-			System.Drawing.Size size = nSize ?? System.Drawing.Size.Empty;
-			IntPtr hWnd = nhWnd ?? IntPtr.Zero;
-			if (size == System.Drawing.Size.Empty || hWnd == IntPtr.Zero)
-			{
-				size = ClientSize;
-				hWnd = Handle;
-			}
-
 			#region Direct3D Initalize
 			// SwapChain description
 			var desc = new DXGI.SwapChainDescription()
 			{
 				BufferCount = 1,
-				ModeDescription = new DXGI.ModeDescription(size.Width, size.Height, new DXGI.Rational(60, 1), DXGI.Format.R8G8B8A8_UNorm),
+				ModeDescription = new DXGI.ModeDescription(0, 0, new DXGI.Rational(60, 1), DXGI.Format.R8G8B8A8_UNorm),
 				IsWindowed = true,
-				OutputHandle = hWnd,
+				OutputHandle = Handle,
 				SampleDescription = new DXGI.SampleDescription(1, 0),
 				SwapEffect = DXGI.SwapEffect.Discard,
 				Usage = DXGI.Usage.RenderTargetOutput
@@ -81,33 +73,23 @@ namespace Ingen.Game.Framework
 
 			// Ignore all windows events
 			using (DXGI.Factory factory = SwapChain.GetParent<DXGI.Factory>())
-				factory.MakeWindowAssociation(hWnd, DXGI.WindowAssociationFlags.IgnoreAll);
-
-			// New RenderTargetView from the backbuffer
-			BackBuffer = D3D11.Resource.FromSwapChain<D3D11.Texture2D>(SwapChain, 0);
-
-			BackBufferView = new D3D11.RenderTargetView(D3D11Device, BackBuffer);
+				factory.MakeWindowAssociation(Handle, DXGI.WindowAssociationFlags.IgnoreAll);
 			#endregion
-			#region Direct2D Initalize
-			D2D1Factory = new D2D1.Factory1();
-			using (var surface = BackBuffer.QueryInterface<DXGI.Surface>())
-			{
-				using (var context0 = new D2D1.DeviceContext(surface))
-					DeviceContext = context0.QueryInterface<D2D1.DeviceContext5>();
-				D2D1BackBuffer = new D2D1.Bitmap1(DeviceContext, surface);
-			}
-			#endregion
-			RenderTargetUpdated?.Invoke();
+
+			ResizeBuffer = true;
 		}
 
 		public event Action RenderTargetUpdated;
 		public event Action<Size2> WindowSizeChanged;
-		private System.Drawing.Size? NewSize { get; set; }
+		private ManualResetEventSlim ResizeMre { get; } = new ManualResetEventSlim();
+		private bool ResizeBuffer { get; set; }
 		protected override void OnSizeChanged(EventArgs e)
 		{
-			NewSize = ClientSize;
-			WindowSizeChanged?.Invoke(new Size2(ClientSize.Width, ClientSize.Height));
 			base.OnClientSizeChanged(e);
+			ResizeMre.Reset();
+			ResizeBuffer = true;
+			ResizeMre.Wait(100);
+			WindowSizeChanged?.Invoke(new Size2(ClientSize.Width, ClientSize.Height));
 		}
 
 
@@ -134,16 +116,27 @@ namespace Ingen.Game.Framework
 		public void BeginDraw()
 		{
 			NextRenderLogicTask?.Invoke();
-			if (NewSize is System.Drawing.Size newSize)
+			if (ResizeBuffer)
 			{
-				(System.Drawing.Size size, IntPtr hWnd) = ((System.Drawing.Size, IntPtr))Invoke(new Func<(System.Drawing.Size, IntPtr)>(() => (ClientSize, Handle)));
+				D2D1BackBuffer?.Dispose();
+				DeviceContext?.Dispose();
+				BackBufferView?.Dispose();
+				BackBuffer?.Dispose();
 
-				D3dDispose();
-				Initalize(size, hWnd);
-				NewSize = null;
+				SwapChain.ResizeBuffers(1, 0, 0, DXGI.Format.R8G8B8A8_UNorm, DXGI.SwapChainFlags.None);
+				BackBuffer = D3D11.Resource.FromSwapChain<D3D11.Texture2D>(SwapChain, 0);
+
+				BackBufferView = new D3D11.RenderTargetView(D3D11Device, BackBuffer);
+				using (var surface = BackBuffer.QueryInterface<DXGI.Surface>())
+				{
+					using (var context0 = new D2D1.DeviceContext(surface))
+						DeviceContext = context0.QueryInterface<D2D1.DeviceContext5>();
+					D2D1BackBuffer = new D2D1.Bitmap1(DeviceContext, surface);
+				}
+				RenderTargetUpdated?.Invoke();
+
+				ResizeBuffer = false;
 			}
-			D3D11Device.ImmediateContext.Rasterizer.SetViewport(0, 0, ClientSize.Width, ClientSize.Height);
-			D3D11Device.ImmediateContext.OutputMerger.SetTargets(_backBufferView);
 
 			DeviceContext.BeginDraw();
 		}
@@ -151,6 +144,7 @@ namespace Ingen.Game.Framework
 		{
 			DeviceContext.EndDraw();
 			SwapChain.Present(1, DXGI.PresentFlags.UseDuration);
+			ResizeMre.Set();
 		}
 
 		public bool IsClosing { get; set; }
